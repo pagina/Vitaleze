@@ -93,7 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         productGrid.innerHTML = '<div class="text-center w-100" style="grid-column:1/-1;"><i class="fa-solid fa-spinner fa-spin fa-2x text-green"></i></div>';
         
         const allProducts = await DataManager.getProducts();
-        const filtered = filter === 'all' ? allProducts : allProducts.filter(p => p.categoria === filter);
+        const filtered = filter === 'all' ? allProducts : allProducts.filter(p => {
+            const cats = Array.isArray(p.categoria) ? p.categoria : [p.categoria];
+            return cats.includes(filter);
+        });
 
         productGrid.innerHTML = '';
 
@@ -108,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             el.innerHTML = `
                 <div class="product-img-wrapper">
-                    <span class="product-category-tag">${p.categoria}</span>
+                    <span class="product-category-tag">${Array.isArray(p.categoria) ? p.categoria.join(' / ') : p.categoria}</span>
                     <img src="${p.imagen}" alt="${p.nombre}" class="product-img" loading="lazy">
                 </div>
                 <div class="product-content">

@@ -7,81 +7,73 @@ class DataManager {
         { 
             id: 'p1', 
             nombre: 'Dona de Chocolate Keto', 
-            categoria: 'Keto', 
-            descripcion: 'Dona húmeda bañada en chocolate 70% cacao.', 
-            ingredientes: 'Chocolate, harina de almendra, stevia.', 
+            categoria: ['Keto'], 
+            descripcion: 'Una delicia irresistible: dona húmeda bañada en chocolate 70% cacao. Perfecta para saciar tus antojos sin salirte de tu dieta.', 
+            ingredientes: 'Chocolate 70% cacao, harina de almendra, stevia.', 
             imagen: './imagenes/dona.png' 
         },
         { 
             id: 'p2', 
             nombre: 'Pan de Almendras (Keto)', 
-            categoria: 'Keto', 
-            descripcion: 'Pan denso y nutritivo, ideal para tostadas.', 
-            ingredientes: 'Harina de almendras, huevo, sal.', 
+            categoria: ['Panadería', 'Keto'], 
+            descripcion: 'El aliado perfecto para tus mañanas. Pan denso, nutritivo y con una textura increíble, ideal para tus tostadas.', 
+            ingredientes: 'Harina de almendras, huevo, sal marina.', 
             imagen: './imagenes/pan de almendras.png' 
         },
         { 
             id: 'p3', 
             nombre: 'Pan Nube Keto', 
-            categoria: 'Keto', 
-            descripcion: 'Pan ultra liviano sin carbohidratos.', 
-            ingredientes: 'Huevo, queso crema, polvo horneado.', 
+            categoria: ['Panadería', 'Keto'], 
+            descripcion: 'Nuestra opción más liviana y versátil. Pan ultra esponjoso, sin carbohidratos, ideal para sándwiches nutritivos.', 
+            ingredientes: 'Huevo, leche en polvo descremada y ajo.', 
             imagen: './imagenes/pan nube keto.jpg' 
         },
         { 
             id: 'p4', 
             nombre: 'Pan Nube Tradicional', 
-            categoria: 'Keto', 
-            descripcion: 'La versión original del famoso Cloud Bread.', 
-            ingredientes: 'Huevo, queso crema.', 
+            categoria: ['Panadería', 'Keto'], 
+            descripcion: 'La versión original del famoso Cloud Bread. Esponjoso, aireado y perfecto para cualquier momento del día.', 
+            ingredientes: 'Huevo, queso crema seleccionado.', 
             imagen: './imagenes/pan nube.png' 
         },
         { 
             id: 'p5', 
             nombre: 'Galletas de Avena y Pasas', 
-            categoria: 'Panadería', 
-            descripcion: 'Súper crocantes y nutritivas.', 
-            ingredientes: 'Avena, pasas de uva, miel.', 
+            categoria: ['Snacks'], 
+            descripcion: 'Súper crocantes y cargadas de sabor natural. Elaboradas con avena integral para darte energía duradera.', 
+            ingredientes: 'Avena integral, pasas de uva, miel natural.', 
             imagen: './imagenes/galletas.png' 
         },
         { 
             id: 'p6', 
             nombre: 'Pan Integral de Masa Madre', 
-            categoria: 'Panadería', 
-            descripcion: 'Pan artesanal con mix de 7 semillas.', 
-            ingredientes: 'Harina integral, semillas, masa madre.', 
+            categoria: ['Panadería'], 
+            descripcion: 'Pan artesanal fermentado naturalmente. Con un mix de semillas que aportan fibra y una corteza rústica.', 
+            ingredientes: 'Harina integral, semillas de lino, chía, masa madre.', 
             imagen: './imagenes/pan integral.png' 
         },
         { 
             id: 'p7', 
             nombre: 'Granola Crunchy', 
-            categoria: 'Desayunos', 
-            descripcion: 'Mix de cereales y frutos secos para tus desayunos.', 
-            ingredientes: 'Avena, nueces, miel.', 
+            categoria: ['Snacks'], 
+            descripcion: 'El toque perfecto para tu bowl. Mix equilibrado de cereales y frutos secos tostados con un toque de miel.', 
+            ingredientes: 'Avena, nueces, almendras, miel.', 
             imagen: './imagenes/granola.png' 
-        },
-        { 
-            id: 'p8', 
-            nombre: 'Mix Vitalidad', 
-            categoria: 'Frutos Secos', 
-            descripcion: 'Nueces, almendras y castañas de cajú seleccionadas.', 
-            ingredientes: 'Nueces, almendras, castañas.', 
-            imagen: './imagenes/mix.png' 
         },
         { 
             id: 'p9', 
             nombre: 'Almohaditas Rellenas (1.2kg)', 
-            categoria: 'Frutos Secos', 
-            descripcion: 'Formato familiar de almohaditas crocantes y nutritivas.', 
-            ingredientes: 'Cereal, relleno variado.', 
+            categoria: ['Frutos Secos', 'Snacks'], 
+            descripcion: 'Un clásico para toda la familia en formato grande. Cereal crocante con rellenos deliciosos para tus meriendas.', 
+            ingredientes: 'Cereal de trigo, relleno variado.', 
             imagen: './imagenes/almohaditas de 1,2 kg.png' 
         },
         { 
             id: 'p10', 
-            nombre: 'Mix Familiar (1.2kg)', 
-            categoria: 'Frutos Secos', 
-            descripcion: 'Mix grande de frutos secos seleccionado para compartir.', 
-            ingredientes: 'Nueces, almendras, maní, pasas.', 
+            nombre: 'Frutos Secos 1/2 kg', 
+            categoria: ['Frutos Secos'], 
+            descripcion: 'La mejor selección de nuestra tienda. Nueces, almendras, maní y pasas seleccionadas para tu máxima vitalidad.', 
+            ingredientes: 'Nueces, almendras, maní, pasas de uva.', 
             imagen: './imagenes/fruto secos 1,2 kg.jpg' 
         }
     ];
@@ -97,31 +89,28 @@ class DataManager {
     // --- MÉTODOS DE ACCESO ---
     
     static async getProducts() {
-        // En modo local siempre devolvemos el catálogo estático de inmediato
         return this.products;
     }
 
     static async getCategories() {
-        const categories = new Set(this.products.map(p => p.categoria));
-        return Array.from(categories).filter(c => c);
+        // Obtenemos todas las categorías, manejando tanto strings como arrays
+        const allCategories = this.products.flatMap(p => 
+            Array.isArray(p.categoria) ? p.categoria : [p.categoria]
+        );
+        // Devolvemos una lista única de categorías válidas
+        return Array.from(new Set(allCategories)).filter(c => c);
     }
 
     static async getSections() {
         return this.sections;
     }
 
-    // El guardado de pedidos ahora se hace solo por WhatsApp, 
-    // pero podemos guardar un log local si se desea.
     static async saveOrder(order) {
         console.log('Pedido registrado localmente:', order);
         return { success: true };
     }
 
-    static async getOrders() {
-        return [];
-    }
-
-    // Métodos de Admin (Desactivados en modo lectura local pura)
+    static async getOrders() { return []; }
     static async saveProduct() { return null; }
     static async updateSection() { return null; }
     static async deleteProduct() { return null; }
