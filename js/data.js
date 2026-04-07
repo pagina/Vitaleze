@@ -1,124 +1,128 @@
-// Datos por defecto (Seed Data) v7
-const defaultProducts = [
-    {
-        id: "prod_2",
-        nombre: "Galletitas y Barras",
-        categoria: "Galletas",
-        descripcion: "Galletas crocantes y barras llenas de energía con chips de chocolate amargo.",
-        ingredientes: "Avena arrollada, harina integral, chips 70% cacao, pasta de maní.",
-        imagen: "./assets/galletas.png"
-    },
-    {
-        id: "prod_6",
-        nombre: "Donuts sin azucar",
-        categoria: "Alfajores",
-        descripcion: "rosquilla tipo donut elaboradas sin azucar añadidas,pensadas como una opcion mas saludable o apta para personas que buscan reducir el consumo de azucar.",
-        ingredientes: "Harina de trigo,huevo,leche,aceite vegetal,edulcorantes,polvo de hornear,cobertura de chocolate sin azucar.",
-        imagen: "./assets/dona.png"
-    },
-    {
-        id: "prod_7",
-        nombre: "Pan Integral",
-        categoria: "Panadería",
-        descripcion: "Pan artesanal elaborado con harina integral 100%. Textura suave por dentro y crocante por fuera, perfecto para tus desayunos y meriendas saludables.",
-        ingredientes: "Harina integral, levadura natural, aceite de oliva, semillas de lino, sal marina, agua purificada.",
-        imagen: "./assets/pan integral.png"
-    },
-    {
-        id: "prod_8",
-        nombre: "Pan de Almendras",
-        categoria: "Panadería",
-        descripcion: "Pan bajo en carbohidratos elaborado con harina de almendras. Ideal para dietas keto y celíacos. Liviano, esponjoso y con un sabor único.",
-        ingredientes: "Harina de almendras, huevos, aceite de coco, polvo de hornear, sal rosada.",
-        imagen: "./assets/pan de almendras.png"
-    },
-    {
-        id: "prod_9",
-        nombre: "Granola Artesanal",
-        categoria: "Cereales",
-        descripcion: "Mezcla crocante de avena, frutos secos y semillas, horneada lentamente con miel pura. Perfecta para acompañar yogur, leche o comer como snack.",
-        ingredientes: "Avena arrollada, almendras, nueces, semillas de girasol, semillas de chía, miel orgánica, aceite de coco, canela.",
-        imagen: "./assets/granola.png"
-    },
-    {
-        id: "prod_10",
-        nombre: "Pan Nube",
-        categoria: "Panadería",
-        descripcion: "Ultraliviano y esponjoso, el pan nube es la alternativa sin harina perfecta. Con solo 3 ingredientes, es ideal para quienes buscan opciones bajas en carbohidratos.",
-        ingredientes: "Queso crema, huevos, cremor tártaro.",
-        imagen: "./assets/pan nube.png"
-    },
-    {
-        id: "prod_11",
-        nombre: "Almohaditas de ½ kg",
-        categoria: "Cereales",
-        descripcion: "Crujientes almohaditas rellenas de chocolate, ideales para un desayuno completo o merienda dulce. Presentación de medio kilo para que te dure toda la semana.",
-        ingredientes: "Harina integral, relleno de chocolate semiamargo, azúcar mascabo, aceite vegetal, extracto de malta.",
-        imagen: "./assets/almohaditas de 1,2 kg.png"
-    },
-    {
-        id: "prod_12",
-        nombre: "Pan Nube Keto",
-        categoria: "Panadería",
-        descripcion: "Liviano, proteico y 100% libre de harinas. Una opción ideal para quienes siguen una dieta keto o baja en carbohidratos.",
-        ingredientes: "Huevo, leche en polvo descremada, ajo y aditivos permitidos.",
-        imagen: "./assets/pan nube keto.jpg"
-    },
-    {
-        id: "prod_13",
-        nombre: "Frutos Secos ½ kg",
-        categoria: "Frutos secos",
-        descripcion: "Mezcla premium de frutos secos en presentación de medio kilo. Perfectos para snackear sano, agregar a tus comidas o disfrutar en cualquier momento del día.",
-        ingredientes: "Nueces, almendras, castañas de cajú, maní tostado, pasas de uva.",
-        imagen: "./assets/fruto secos 1,2 kg.jpg"
-    }
-];
+// Gestión de Datos VITALEZE 🌾 - MODO 100% LOCAL
+// Este archivo carga los datos directamente sin depender de servidores externos.
 
-// Gestión de Datos
 class DataManager {
-    static init() {
-        // Usamos una nueva clave (v7) para asegurar que tome los nuevos datos e ignore los viejos
-        if (!localStorage.getItem('vitaleze_productos_v7')) {
-            localStorage.setItem('vitaleze_productos_v7', JSON.stringify(defaultProducts));
+    // 1. Catálogo Completo de Productos (Basado en carpeta /imagenes)
+    static products = [
+        { 
+            id: 'p1', 
+            nombre: 'Dona de Chocolate Keto', 
+            categoria: 'Keto', 
+            descripcion: 'Dona húmeda bañada en chocolate 70% cacao.', 
+            ingredientes: 'Chocolate, harina de almendra, stevia.', 
+            imagen: './imagenes/dona.png' 
+        },
+        { 
+            id: 'p2', 
+            nombre: 'Pan de Almendras (Keto)', 
+            categoria: 'Keto', 
+            descripcion: 'Pan denso y nutritivo, ideal para tostadas.', 
+            ingredientes: 'Harina de almendras, huevo, sal.', 
+            imagen: './imagenes/pan de almendras.png' 
+        },
+        { 
+            id: 'p3', 
+            nombre: 'Pan Nube Keto', 
+            categoria: 'Keto', 
+            descripcion: 'Pan ultra liviano sin carbohidratos.', 
+            ingredientes: 'Huevo, queso crema, polvo horneado.', 
+            imagen: './imagenes/pan nube keto.jpg' 
+        },
+        { 
+            id: 'p4', 
+            nombre: 'Pan Nube Tradicional', 
+            categoria: 'Keto', 
+            descripcion: 'La versión original del famoso Cloud Bread.', 
+            ingredientes: 'Huevo, queso crema.', 
+            imagen: './imagenes/pan nube.png' 
+        },
+        { 
+            id: 'p5', 
+            nombre: 'Galletas de Avena y Pasas', 
+            categoria: 'Panadería', 
+            descripcion: 'Súper crocantes y nutritivas.', 
+            ingredientes: 'Avena, pasas de uva, miel.', 
+            imagen: './imagenes/galletas.png' 
+        },
+        { 
+            id: 'p6', 
+            nombre: 'Pan Integral de Masa Madre', 
+            categoria: 'Panadería', 
+            descripcion: 'Pan artesanal con mix de 7 semillas.', 
+            ingredientes: 'Harina integral, semillas, masa madre.', 
+            imagen: './imagenes/pan integral.png' 
+        },
+        { 
+            id: 'p7', 
+            nombre: 'Granola Crunchy', 
+            categoria: 'Desayunos', 
+            descripcion: 'Mix de cereales y frutos secos para tus desayunos.', 
+            ingredientes: 'Avena, nueces, miel.', 
+            imagen: './imagenes/granola.png' 
+        },
+        { 
+            id: 'p8', 
+            nombre: 'Mix Vitalidad', 
+            categoria: 'Frutos Secos', 
+            descripcion: 'Nueces, almendras y castañas de cajú seleccionadas.', 
+            ingredientes: 'Nueces, almendras, castañas.', 
+            imagen: './imagenes/mix.png' 
+        },
+        { 
+            id: 'p9', 
+            nombre: 'Almohaditas Rellenas (1.2kg)', 
+            categoria: 'Frutos Secos', 
+            descripcion: 'Formato familiar de almohaditas crocantes y nutritivas.', 
+            ingredientes: 'Cereal, relleno variado.', 
+            imagen: './imagenes/almohaditas de 1,2 kg.png' 
+        },
+        { 
+            id: 'p10', 
+            nombre: 'Mix Familiar (1.2kg)', 
+            categoria: 'Frutos Secos', 
+            descripcion: 'Mix grande de frutos secos seleccionado para compartir.', 
+            ingredientes: 'Nueces, almendras, maní, pasas.', 
+            imagen: './imagenes/fruto secos 1,2 kg.jpg' 
         }
+    ];
+
+    // 2. Secciones del Sitio (Textos Principales)
+    static sections = {
+        'hero_h1': { valor: 'Alimentación saludable a <span class="text-gradient">tu alcance</span>', imagen_url: './imagenes/hero-demo.jpg' },
+        'hero_p': { valor: 'Opciones nutritivas para tu día a día. Budines, barras proteicas, panadería integral y más, listos para recargar tu energía.', imagen_url: null },
+        'about_h2': { valor: 'Sobre Nosotros', imagen_url: './imagenes/about-demo.jpg' },
+        'about_p1': { valor: '<strong>Vitaleze 🌾</strong> es un lugar pensado para acercarte opciones saludables y nutritivas. Ofrecemos productos ideales para desayunos, meriendas o esos momentos donde necesitas un plus de energía.', imagen_url: null }
+    };
+
+    // --- MÉTODOS DE ACCESO ---
+    
+    static async getProducts() {
+        // En modo local siempre devolvemos el catálogo estático de inmediato
+        return this.products;
     }
 
-    // --- PRODUCTOS ---
-    static getProducts() {
-        return JSON.parse(localStorage.getItem('vitaleze_productos_v7')) || [];
+    static async getCategories() {
+        const categories = new Set(this.products.map(p => p.categoria));
+        return Array.from(categories).filter(c => c);
     }
 
-    static saveProduct(product) {
-        const products = this.getProducts();
-        if (product.id) {
-            // Update
-            const index = products.findIndex(p => p.id === product.id);
-            if (index !== -1) {
-                products[index] = product;
-            } else {
-                products.push(product); // fallback
-            }
-        } else {
-            // Create
-            product.id = 'prod_' + Date.now();
-            products.push(product);
-        }
-        localStorage.setItem('vitaleze_productos_v7', JSON.stringify(products));
-        return product;
+    static async getSections() {
+        return this.sections;
     }
 
-    static deleteProduct(id) {
-        let products = this.getProducts();
-        products = products.filter(p => p.id !== id);
-        localStorage.setItem('vitaleze_productos_v7', JSON.stringify(products));
+    // El guardado de pedidos ahora se hace solo por WhatsApp, 
+    // pero podemos guardar un log local si se desea.
+    static async saveOrder(order) {
+        console.log('Pedido registrado localmente:', order);
+        return { success: true };
     }
 
-    static getCategories() {
-        const products = this.getProducts();
-        const categories = new Set(products.map(p => p.categoria));
-        return Array.from(categories);
+    static async getOrders() {
+        return [];
     }
+
+    // Métodos de Admin (Desactivados en modo lectura local pura)
+    static async saveProduct() { return null; }
+    static async updateSection() { return null; }
+    static async deleteProduct() { return null; }
 }
-
-// Inicializar al cargar el script
-DataManager.init();
