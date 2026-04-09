@@ -8,25 +8,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Cargar Contenido Dinámico (Secciones)
     async function loadDynamicSections() {
-        const sections = await DataManager.getSections();
-        
-        // Hero Section
-        if (sections['hero_h1']) document.querySelector('.hero h1').innerHTML = sections['hero_h1'].valor;
-        if (sections['hero_p']) document.querySelector('.hero p').textContent = sections['hero_p'].valor;
-        if (sections['hero_img']?.imagen_url) document.getElementById('hero-img').src = sections['hero_img'].imagen_url;
+        try {
+            const sections = await DataManager.getSections();
+            
+            // Hero Section
+            if (sections['hero_h1']) {
+                const heroH1 = document.querySelector('.hero h1');
+                if (heroH1) heroH1.innerHTML = sections['hero_h1'].valor;
+            }
+            if (sections['hero_p']) {
+                const heroP = document.querySelector('.hero-content p');
+                if (heroP) heroP.textContent = sections['hero_p'].valor;
+            }
+            if (sections['hero_img']?.imagen_url) {
+                const heroImg = document.getElementById('hero-img');
+                if (heroImg) heroImg.src = sections['hero_img'].imagen_url;
+            }
 
-        // About Section
-        if (sections['about_h2']) document.querySelector('.about .section-title').textContent = sections['about_h2'].valor;
-        if (sections['about_p1']) {
-             const paragraphs = document.querySelectorAll('.about-text p');
-             if (paragraphs[0]) paragraphs[0].innerHTML = sections['about_p1'].valor;
+            // About Section
+            if (sections['about_h2']) {
+                const aboutTitle = document.querySelector('.about .section-title');
+                if (aboutTitle) aboutTitle.textContent = sections['about_h2'].valor;
+            }
+            if (sections['about_p1']) {
+                const paragraphs = document.querySelectorAll('.about-text p');
+                if (paragraphs[0]) paragraphs[0].innerHTML = sections['about_p1'].valor;
+            }
+            if (sections['about_img']?.imagen_url) {
+                const aboutImg = document.getElementById('about-img');
+                if (aboutImg) aboutImg.src = sections['about_img'].imagen_url;
+            }
+        } catch (e) {
+            console.warn('Error cargando secciones dinámicas:', e);
         }
-        if (sections['about_img']?.imagen_url) document.getElementById('about-img').src = sections['about_img'].imagen_url;
     }
 
     // Inicializar UI con resiliencia y en paralelo
     async function init() {
-        // Ejecutamos las cargas en paralelo para que una no bloquee a la otra
         const sectionsPromise = loadDynamicSections().catch(e => console.error('Error secciones:', e));
         const filtersPromise = initFilters().catch(e => console.error('Error filtros:', e));
         const productsPromise = renderProducts('all').catch(e => console.error('Error productos:', e));
@@ -89,12 +107,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Helper: crear imagen con fallback
+    function createProductImage(src, alt) {
+        const img = document.createElement('img');
+        img.className = 'product-img';
+        img.loading = 'lazy';
+        img.alt = alt;
+        img.src = src || './imagenes/logo.png';
+        
+        // Fallback si la imagen no carga
+        img.onerror = function() {
+            this.onerror = null; // evitar loop
+            this.src = './imagenes/logo.png';
+            this.style.objectFit = 'contain';
+            this.style.padding = '2rem';
+            this.style.background = '#f3f4f1';
+        };
+        
+        return img;
+    }
+
     async function renderProducts(filter) {
         productGrid.innerHTML = '<div class="text-center w-100" style="grid-column:1/-1;"><i class="fa-solid fa-spinner fa-spin fa-2x text-green"></i></div>';
         
         const allProducts = await DataManager.getProducts();
         const filtered = filter === 'all' ? allProducts : allProducts.filter(p => {
-            const cats = Array.isArray(p.categoria) ? p.categoria : [p.categoria];
+            const cats = Array.isArray(p.categoria) ? p.categoria : (p.categoria || '').split(',').map(c => c.trim());
             return cats.includes(filter);
         });
 
@@ -109,20 +147,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             const el = document.createElement('div');
             el.className = 'product-card';
             
-            el.innerHTML = `
-                <div class="product-img-wrapper">
-                    <span class="product-category-tag">${Array.isArray(p.categoria) ? p.categoria.join(' / ') : p.categoria}</span>
-                    <img src="${p.imagen}" alt="${p.nombre}" class="product-img" loading="lazy">
-                </div>
-                <div class="product-content">
-                    <h3 class="product-title">${p.nombre}</h3>
-                    <p class="product-desc">${p.descripcion}</p>
-                    ${p.ingredientes ? `<div class="product-ingredients"><strong>Ingredientes:</strong> ${p.ingredientes}</div>` : ''}
-                    <button class="btn btn-primary w-100 mt-2 btn-order" data-id="${p.id}" data-nombre="${p.nombre}">
-                        <i class="fa-brands fa-whatsapp"></i> Pedir
-                    </button>
-                </div>
+            // Crear wrapper de imagen
+            const imgWrapper = document.createElement('div');
+            imgWrapper.className = 'product-img-wrapper';
+            
+            // Tag de categoría
+            const catTag = document.createElement('span');
+            catTag.className = 'product-category-tag';
+            catTag.textContent = Array.isArray(p.categoria) ? p.categoria.join(' / ') : (p.categoria || 'Sin categoría');
+            imgWrapper.appendChild(catTag);
+            
+            // Imagen con fallback
+            const img = createProductImage(p.imagen, p.nombre);
+            imgWrapper.appendChild(img);
+            
+            el.appendChild(imgWrapper);
+            
+            // Contenido
+            const content = document.createElement('div');
+            content.className = 'product-content';
+            content.innerHTML = `
+                <h3 class="product-title">${p.nombre}</h3>
+                <p class="product-desc">${p.descripcion || ''}</p>
+                ${p.ingredientes ? `<div class="product-ingredients"><strong>Ingredientes:</strong> ${p.ingredientes}</div>` : ''}
+                <button class="btn btn-primary w-100 mt-2 btn-order" data-id="${p.id}" data-nombre="${p.nombre}">
+                    <i class="fa-brands fa-whatsapp"></i> Pedir
+                </button>
             `;
+            el.appendChild(content);
+            
             productGrid.appendChild(el);
         });
 
@@ -132,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pId = btn.dataset.id;
                 const pNombre = btn.dataset.nombre;
 
-                // Guardar pedido en Supabase
+                // Guardar pedido
                 await DataManager.saveOrder({
                     cliente: 'Cliente Web',
                     productos: { id: pId, nombre: pNombre },
