@@ -38,7 +38,7 @@ var FALLBACK_PRODUCTS = [
 
 var FALLBACK_SECTIONS = {
     hero_h1: { valor: 'Alimentación saludable a <span class="text-gradient">tu alcance</span>' },
-    hero_p: { valor: 'Opciones nutritivas para tu día a día.' },
+    hero_p: { valor: 'Opciones nutritivas para tu día a día. Panadería saludable, frutos secos, mix de tierra y muchos más, para recargar tu energía.' },
     hero_img: { valor: '', imagen_url: './imagenes/hero-demo.jpg' },
     about_h2: { valor: 'Sobre Nosotros' },
     about_p1: { valor: '<strong>Vitaleze 🌾</strong> es un lugar pensado para acercarte opciones saludables y nutritivas.' },

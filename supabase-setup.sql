@@ -76,7 +76,7 @@ INSERT INTO vitaleze_productos (nombre, categoria, descripcion, ingredientes, im
 -- ==========================================
 INSERT INTO vitaleze_secciones (clave, valor, imagen_url) VALUES
 ('hero_h1', 'Alimentación saludable a <span class="text-gradient">tu alcance</span>', NULL),
-('hero_p', 'Opciones nutritivas para tu día a día. Budines, barras proteicas, panadería integral y más.', NULL),
+('hero_p', 'Opciones nutritivas para tu día a día. Panadería saludable, frutos secos, mix de tierra y muchos más, para recargar tu energía.', NULL),
 ('hero_img', '', './imagenes/hero-demo.jpg'),
 ('about_h2', 'Sobre Nosotros', NULL),
 ('about_p1', '<strong>Vitaleze 🌾</strong> es un lugar pensado para acercarte opciones saludables y nutritivas.', NULL),
