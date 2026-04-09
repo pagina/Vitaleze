@@ -1,30 +1,16 @@
 -- =============================================
 -- VITALEZE 🌾 - SQL PARA SUPABASE
--- Proyecto: joojnfeficesvoupwmsw
+-- Proyecto: ienszeqwyqrvlewoaasv
 -- =============================================
---
--- INSTRUCCIONES:
--- 1. Copiá TODO este archivo
--- 2. Andá a: https://supabase.com/dashboard/project/joojnfeficesvoupwmsw/sql/new
--- 3. Pegá todo y dale RUN
--- 4. Tiene que decir "Success"
---
--- DESPUÉS de ejecutar esto:
--- 5. Andá a Authentication > Providers > Email > Desactivá "Confirm email"
--- 6. Andá a Authentication > Users > Add user
---    → Poné tu email y tu contraseña
---    → Marcá "Auto Confirm User"
+-- COPIÁ TODO ESTE ARCHIVO Y PEGALO EN:
+-- https://supabase.com/dashboard/project/ienszeqwyqrvlewoaasv/sql/new
+-- Clickeá RUN → tiene que decir "Success"
 -- =============================================
-
--- Borrar tablas si existen (para empezar limpio)
-DROP TABLE IF EXISTS vitaleze_pedidos CASCADE;
-DROP TABLE IF EXISTS vitaleze_productos CASCADE;
-DROP TABLE IF EXISTS vitaleze_secciones CASCADE;
 
 -- ==========================================
 -- TABLA: PRODUCTOS
 -- ==========================================
-CREATE TABLE vitaleze_productos (
+CREATE TABLE IF NOT EXISTS vitaleze_productos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre TEXT NOT NULL,
     categoria TEXT,
@@ -37,7 +23,7 @@ CREATE TABLE vitaleze_productos (
 -- ==========================================
 -- TABLA: PEDIDOS
 -- ==========================================
-CREATE TABLE vitaleze_pedidos (
+CREATE TABLE IF NOT EXISTS vitaleze_pedidos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cliente TEXT NOT NULL DEFAULT 'Cliente Web',
     telefono TEXT,
@@ -50,7 +36,7 @@ CREATE TABLE vitaleze_pedidos (
 -- ==========================================
 -- TABLA: SECCIONES (textos e imágenes de la web)
 -- ==========================================
-CREATE TABLE vitaleze_secciones (
+CREATE TABLE IF NOT EXISTS vitaleze_secciones (
     id SERIAL PRIMARY KEY,
     clave TEXT UNIQUE NOT NULL,
     valor TEXT,
@@ -87,47 +73,25 @@ ON CONFLICT (clave) DO NOTHING;
 -- SEGURIDAD: ROW LEVEL SECURITY (RLS)
 -- ==========================================
 
--- Activar RLS en todas las tablas
+-- Activar RLS
 ALTER TABLE vitaleze_productos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vitaleze_pedidos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vitaleze_secciones ENABLE ROW LEVEL SECURITY;
 
--- PRODUCTOS: Todos pueden ver. Solo usuarios autenticados pueden editar.
-CREATE POLICY "productos_ver" ON vitaleze_productos
-    FOR SELECT USING (true);
-CREATE POLICY "productos_crear" ON vitaleze_productos
-    FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "productos_editar" ON vitaleze_productos
-    FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "productos_borrar" ON vitaleze_productos
-    FOR DELETE TO authenticated USING (true);
+-- PRODUCTOS: Todos ven. Autenticados editan.
+CREATE POLICY "productos_ver" ON vitaleze_productos FOR SELECT USING (true);
+CREATE POLICY "productos_crear" ON vitaleze_productos FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "productos_editar" ON vitaleze_productos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "productos_borrar" ON vitaleze_productos FOR DELETE TO authenticated USING (true);
 
--- PEDIDOS: Cualquiera puede crear. Solo autenticados ven/editan/borran.
-CREATE POLICY "pedidos_crear" ON vitaleze_pedidos
-    FOR INSERT WITH CHECK (true);
-CREATE POLICY "pedidos_ver" ON vitaleze_pedidos
-    FOR SELECT TO authenticated USING (true);
-CREATE POLICY "pedidos_editar" ON vitaleze_pedidos
-    FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "pedidos_borrar" ON vitaleze_pedidos
-    FOR DELETE TO authenticated USING (true);
+-- PEDIDOS: Cualquiera crea. Autenticados ven/editan/borran.
+CREATE POLICY "pedidos_crear" ON vitaleze_pedidos FOR INSERT WITH CHECK (true);
+CREATE POLICY "pedidos_ver" ON vitaleze_pedidos FOR SELECT TO authenticated USING (true);
+CREATE POLICY "pedidos_editar" ON vitaleze_pedidos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "pedidos_borrar" ON vitaleze_pedidos FOR DELETE TO authenticated USING (true);
 
--- SECCIONES: Todos pueden ver. Solo autenticados editan.
-CREATE POLICY "secciones_ver" ON vitaleze_secciones
-    FOR SELECT USING (true);
-CREATE POLICY "secciones_crear" ON vitaleze_secciones
-    FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "secciones_editar" ON vitaleze_secciones
-    FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "secciones_borrar" ON vitaleze_secciones
-    FOR DELETE TO authenticated USING (true);
-
--- ==========================================
--- ✅ LISTO! Ahora:
--- 1. Andá a Authentication > Providers > Email > "Confirm email" → OFF
--- 2. Andá a Authentication > Users > Add user
---    Email: lo que vos quieras
---    Password: lo que vos quieras
---    ✅ Auto Confirm User
--- 3. Abrí admin.html y logueate con eso
--- ==========================================
+-- SECCIONES: Todos ven. Autenticados editan.
+CREATE POLICY "secciones_ver" ON vitaleze_secciones FOR SELECT USING (true);
+CREATE POLICY "secciones_crear" ON vitaleze_secciones FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "secciones_editar" ON vitaleze_secciones FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "secciones_borrar" ON vitaleze_secciones FOR DELETE TO authenticated USING (true);

@@ -1,11 +1,11 @@
 // =============================================
 // VITALEZE 🌾 — CAPA DE DATOS
 // Supabase (primario) + fallback local
-// Proyecto: joojnfeficesvoupwmsw
+// Proyecto: ienszeqwyqrvlewoaasv
 // =============================================
 
-var SUPABASE_URL = 'https://joojnfeficesvoupwmsw.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvb2puZmVmaWNlc3ZvdXB3bXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNDQ3NTcsImV4cCI6MjA5MDgyMDc1N30.ZNRK_M8HcI6py1smNMSXyQ4sXrLDnQmtN7wTt_U49lE';
+var SUPABASE_URL = 'https://ienszeqwyqrvlewoaasv.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllbnN6ZXF3eXFydmxld29hYXN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDEzNTIsImV4cCI6MjA5MTMxNzM1Mn0.4WVf1cCVzThCQaDIdIEDT3LXYzr4EI0CS-HUWaTf6qI';
 
 // Contraseña local de emergencia (siempre funciona)
 var LOCAL_PASS = 'vitaleze2026';
@@ -213,9 +213,9 @@ class DataManager {
 
         // 3. Si nada funcionó
         if (supabaseOk) {
-            return { ok: false, msg: 'Email o contraseña de Supabase incorrectos. También podés entrar con la contraseña: ' + LOCAL_PASS };
+            return { ok: false, msg: 'Email o contraseña incorrectos.' };
         }
-        return { ok: false, msg: 'No se pudo conectar a Supabase. Usá la contraseña: ' + LOCAL_PASS };
+        return { ok: false, msg: 'Error de conexión. Intentá de nuevo.' };
     }
 
     static async logout() {
