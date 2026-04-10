@@ -7,6 +7,24 @@
     <title>Vitaleze 🌾 – Alimentación saludable a tu alcance</title>
     <meta name="description"
         content="Opciones saludables y nutritivas para tu día a día. Hacé tu pedido de budines, barras, galletas y más.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./imagenes/logo.png">
+
+    <!-- Open Graph / Redes Sociales (WhatsApp, Instagram, Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://vitaleze.com.ar/"> <!-- CAAMBIAR POR TU DOMINIO REAL -->
+    <meta property="og:title" content="Vitaleze 🌾 – Alimentación saludable a tu alcance">
+    <meta property="og:description" content="Opciones saludables y nutritivas para tu día a día. Hacé tu pedido de budines, barras, galletas y más.">
+    <!-- Para OG Image se necesita una URL PÚBLICA ABSOLUTA. Reemplazar cuando subas la web: -->
+    <meta property="og:image" content="https://vitaleze.com.ar/imagenes/logo.png">
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vitaleze 🌾 – Alimentación saludable a tu alcance">
+    <meta name="twitter:description" content="Opciones saludables y nutritivas para tu día a día. Hacé tu pedido de budines, barras, galletas y más.">
+    <meta name="twitter:image" content="https://vitaleze.com.ar/imagenes/logo.png">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -230,8 +248,45 @@
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
+    <!-- Overlay y Sidebar del Carrito -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+    
+    <div id="cart-sidebar" class="cart-sidebar glassmorphism">
+        <div class="cart-header">
+            <h3><i class="fa-solid fa-cart-shopping"></i> Tu Pedido</h3>
+            <button id="close-cart" class="btn-icon" aria-label="Cerrar Carrito"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <div id="cart-items" class="cart-items">
+                <p class="text-muted text-center py-4">Tu carrito está vacío.</p>
+            </div>
+            
+            <form id="checkout-form" class="checkout-form mt-4">
+                <h4 class="mb-4">Completa tus datos</h4>
+                <div class="form-group">
+                    <label for="co-nombre">Nombre y Apellido *</label>
+                    <input type="text" id="co-nombre" class="form-control" required placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label for="co-telefono">Celular (WhatsApp) *</label>
+                    <input type="tel" id="co-telefono" class="form-control" required placeholder="Ej: 3511234567">
+                </div>
+                <div class="form-group">
+                    <label for="co-direccion">Dirección de Entrega *</label>
+                    <input type="text" id="co-direccion" class="form-control" required placeholder="Calle, Número, Barrio">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mt-4">
+                    <i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp
+                </button>
+            </form>
+        </div>
+    </div>
 
-    <!-- Supabase -->
+    <!-- Botón Flotante Carrito -->
+    <button id="cart-floating-btn" class="cart-floating-btn" aria-label="Ver Carrito">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span id="cart-count" class="cart-count">0</span>
+    </button>    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/data.js"></script>
     <script src="./js/app.js"></script>

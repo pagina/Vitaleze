@@ -317,16 +317,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             tbody.innerHTML = '';
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>${orderFilter === 'all' ? 'No hay pedidos' : 'Sin pedidos con este estado'}</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>${orderFilter === 'all' ? 'No hay pedidos' : 'Sin pedidos con este estado'}</p></div></td></tr>`;
                 return;
             }
 
             filtered.forEach(o => {
                 const d = new Date(o.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                const pName = o.productos?.nombre || (typeof o.productos === 'string' ? o.productos : 'Pedido');
+                
+                let pName = 'Pedido';
+                if (Array.isArray(o.productos)) {
+                    pName = o.productos.map(p => `${p.cantidad}x ${p.nombre}`).join('<br>');
+                } else if (o.productos?.nombre) {
+                    pName = o.productos.nombre;
+                } else if (typeof o.productos === 'string') {
+                    pName = o.productos;
+                }
+
+                const telDir = `${o.telefono || '-'} <br><small class="text-muted">${o.direccion || '-'}</small>`;
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${d}</td><td>${o.cliente}</td><td>${pName}</td>
+                    <td>${d}</td><td>${o.cliente}</td><td>${telDir}</td><td><div style="max-height:80px;overflow-y:auto;font-size:0.85em;">${pName}</div></td>
                     <td><span class="status-badge ${statusClass(o.estado)}">${o.estado}</span></td>
                     <td><div class="order-actions">
                         <select class="order-status-select" data-id="${o.id}">

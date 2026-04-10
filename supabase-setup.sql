@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS vitaleze_pedidos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cliente TEXT NOT NULL DEFAULT 'Cliente Web',
     telefono TEXT,
+    direccion TEXT,
     productos JSONB,
     total NUMERIC DEFAULT 0,
     estado TEXT DEFAULT 'Pendiente',

@@ -123,7 +123,10 @@ class DataManager {
             try {
                 await sb.from('vitaleze_pedidos').insert([{
                     cliente: order.cliente || 'Cliente Web',
+                    telefono: order.telefono,
+                    direccion: order.direccion,
                     productos: order.productos,
+                    total: order.total || 0,
                     estado: 'Pendiente'
                 }]);
             } catch (e) { /* no bloquear */ }

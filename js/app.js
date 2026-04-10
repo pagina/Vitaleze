@@ -170,8 +170,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h3 class="product-title">${p.nombre}</h3>
                 <p class="product-desc">${p.descripcion || ''}</p>
                 ${p.ingredientes ? `<div class="product-ingredients"><strong>Ingredientes:</strong> ${p.ingredientes}</div>` : ''}
-                <button class="btn btn-primary w-100 mt-2 btn-order" data-id="${p.id}" data-nombre="${p.nombre}">
-                    <i class="fa-brands fa-whatsapp"></i> Pedir
+                <button class="btn btn-primary w-100 mt-2 btn-add-cart" data-id="${p.id}" data-nombre="${p.nombre}">
+                    <i class="fa-solid fa-cart-shopping"></i> Agregar
                 </button>
             `;
             el.appendChild(content);
@@ -179,22 +179,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             productGrid.appendChild(el);
         });
 
-        // Eventos de Pedido
-        productGrid.querySelectorAll('.btn-order').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
+        // Eventos de Agregar al Carrito
+        productGrid.querySelectorAll('.btn-add-cart').forEach(btn => {
+            btn.addEventListener('click', (e) => {
                 const pId = btn.dataset.id;
                 const pNombre = btn.dataset.nombre;
-
-                // Guardar pedido
-                await DataManager.saveOrder({
-                    cliente: 'Cliente Web',
-                    productos: { id: pId, nombre: pNombre },
-                    fecha: new Date().toISOString()
-                });
-
-                // Redirigir a WhatsApp
-                const waText = encodeURIComponent(`Hola Vitaleze, quiero encargar: ${pNombre} 🌾`);
-                window.open(`https://wa.me/5493512755594?text=${waText}`, '_blank');
+                addToCart(pId, pNombre);
+                
+                // Efecto de feedback visual rápido
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Agregado';
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                }, 1000);
             });
         });
     }
@@ -209,5 +208,169 @@ document.addEventListener('DOMContentLoaded', async () => {
             heroBg.style.transform = `translate(-${x * 30}px, -${y * 30}px)`;
         }
     });
+
+    // -------------------------------------------------------------
+    // 3. Lógica del Carrito de Compras
+    // -------------------------------------------------------------
+    let cart = [];
+    
+    const cartFloatingBtn = document.getElementById('cart-floating-btn');
+    const cartCount = document.getElementById('cart-count');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const closeCartBtn = document.getElementById('close-cart');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const checkoutForm = document.getElementById('checkout-form');
+    const cartOverlay = document.getElementById('cart-overlay');
+    
+    if (cartFloatingBtn && closeCartBtn && cartSidebar) {
+        cartFloatingBtn.addEventListener('click', () => {
+            cartSidebar.classList.add('active');
+            if (cartOverlay) cartOverlay.classList.add('active');
+        });
+        
+        closeCartBtn.addEventListener('click', () => {
+            cartSidebar.classList.remove('active');
+            if (cartOverlay) cartOverlay.classList.remove('active');
+        });
+
+        if (cartOverlay) {
+            cartOverlay.addEventListener('click', () => {
+                cartSidebar.classList.remove('active');
+                cartOverlay.classList.remove('active');
+            });
+        }
+    }
+
+    window.addToCart = function(id, nombre) {
+        const existing = cart.find(i => i.id === id);
+        if (existing) {
+            existing.cantidad++;
+        } else {
+            cart.push({ id, nombre, cantidad: 1 });
+        }
+        updateCart();
+    };
+
+    function updateCart() {
+        if (!cartCount || !cartItemsContainer) return;
+
+        // Actualizar contador
+        const totalItems = cart.reduce((sum, item) => sum + item.cantidad, 0);
+        cartCount.textContent = totalItems;
+
+        // Animar el botón del carrito
+        cartFloatingBtn.classList.add('bounce');
+        setTimeout(() => cartFloatingBtn.classList.remove('bounce'), 300);
+        
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p class="text-muted text-center py-4">Tu carrito está vacío.</p>';
+            return;
+        }
+
+        cartItemsContainer.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <span class="cart-item-name">${item.nombre}</span>
+                    <span class="cart-item-qty">Cantidad: ${item.cantidad}</span>
+                </div>
+                <div class="cart-item-actions">
+                    <button type="button" class="btn-qty-minus" data-id="${item.id}" aria-label="Restar">-</button>
+                    <button type="button" class="btn-qty-plus" data-id="${item.id}" aria-label="Sumar">+</button>
+                    <button type="button" class="btn-remove-item" data-id="${item.id}" aria-label="Eliminar"><i class="fa-solid fa-trash text-muted"></i></button>
+                </div>
+            </div>
+        `).join('');
+
+        // Eventos a los botones internos del carrito
+        cartItemsContainer.querySelectorAll('.btn-remove-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                cart = cart.filter(i => i.id !== id);
+                updateCart();
+            });
+        });
+
+        cartItemsContainer.querySelectorAll('.btn-qty-plus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                const item = cart.find(i => i.id === id);
+                if (item) item.cantidad++;
+                updateCart();
+            });
+        });
+
+        cartItemsContainer.querySelectorAll('.btn-qty-minus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                const item = cart.find(i => i.id === id);
+                if (item && item.cantidad > 1) {
+                    item.cantidad--;
+                } else if (item && item.cantidad === 1) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+                updateCart();
+            });
+        });
+    }
+
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert('Agrega al menos un producto al carrito');
+                return;
+            }
+
+            const nombre = document.getElementById('co-nombre').value;
+            const telefono = document.getElementById('co-telefono').value;
+            const direccion = document.getElementById('co-direccion').value;
+            
+            const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+
+            try {
+                // Guardar pedido en base de datos
+                await DataManager.saveOrder({
+                    cliente: nombre,
+                    telefono: telefono,
+                    direccion: direccion,
+                    productos: cart,
+                    total: 0, // A coordinar, como no hay precios en DB aún
+                    fecha: new Date().toISOString()
+                });
+                
+                // Generar mensaje para WhatsApp
+                let msg = `Hola Vitaleze 🌾, ¡quisiera confirmar mi pedido!\n\n`;
+                msg += `*Mis datos:*\n`;
+                msg += `Nombre: ${nombre}\n`;
+                msg += `Tel: ${telefono}\n`;
+                msg += `Dirección: ${direccion}\n\n`;
+                msg += `*Mi pedido:*\n`;
+                cart.forEach(item => {
+                    msg += `- ${item.cantidad}x ${item.nombre}\n`;
+                });
+                msg += `\nAguardá confirmación, ¡muchas gracias!`;
+
+                window.open(`https://wa.me/5493512755594?text=${encodeURIComponent(msg)}`, '_blank');
+                
+                // Reset y cerrar
+                cart = [];
+                updateCart();
+                cartSidebar.classList.remove('active');
+                if (cartOverlay) cartOverlay.classList.remove('active');
+                checkoutForm.reset();
+                
+            } catch (err) {
+                console.error('Error al guardar:', err);
+                alert('Hubo un error, pero te redirigimos igual a WhatsApp para no perder tu pedido.');
+                const waText = encodeURIComponent(`Hola Vitaleze, quiero encargar mi pedido pero hubo un error al cargar mis datos.`);
+                window.open(`https://wa.me/5493512755594?text=${waText}`, '_blank');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp';
+            }
+        });
+    }
 
 });
