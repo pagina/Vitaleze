@@ -1,3 +1,17 @@
+// ==========================================
+// Limpieza de caché viejo (PWA eliminada)
+// ==========================================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+        }
+    });
+}
+
+// ==========================================
+// FUNCIONALIDAD DEL CATÁLOGO Y CARRITO
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     // Referencias DOM Principales
     const productGrid = document.getElementById('product-grid');
@@ -352,7 +366,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 msg += `\nAguardá confirmación, ¡muchas gracias!`;
 
-                const waUrl = `https://wa.me/5493512755594?text=${encodeURIComponent(msg)}`;
+                // Usamos api.whatsapp que suele fallar menos que wa.me en algunos navegadores móviles (como Safari)
+                const waUrl = `https://api.whatsapp.com/send?phone=5493512755594&text=${encodeURIComponent(msg)}`;
                 
                 // Redirigimos la ventana actual para saltar el bloqueo de popups (popup blocker)
                 window.location.href = waUrl;
@@ -367,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error('Error al guardar:', err);
                 const waText = encodeURIComponent(`Hola Vitaleze, quiero encargar mi pedido pero hubo un error al cargar mis datos.`);
-                window.location.href = `https://wa.me/5493512755594?text=${waText}`;
+                window.location.href = `https://api.whatsapp.com/send?phone=5493512755594&text=${waText}`;
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp';
