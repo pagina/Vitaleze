@@ -25,9 +25,9 @@ CREATE POLICY "productos_editar" ON vitaleze_productos FOR UPDATE USING (true) W
 CREATE POLICY "productos_borrar" ON vitaleze_productos FOR DELETE USING (true);
 
 CREATE POLICY "pedidos_crear" ON vitaleze_pedidos FOR INSERT WITH CHECK (true);
-CREATE POLICY "pedidos_ver" ON vitaleze_pedidos FOR SELECT TO authenticated USING (true);
-CREATE POLICY "pedidos_editar" ON vitaleze_pedidos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "pedidos_borrar" ON vitaleze_pedidos FOR DELETE TO authenticated USING (true);
+CREATE POLICY "pedidos_ver" ON vitaleze_pedidos FOR SELECT USING (true);
+CREATE POLICY "pedidos_editar" ON vitaleze_pedidos FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "pedidos_borrar" ON vitaleze_pedidos FOR DELETE USING (true);
 
 CREATE POLICY "secciones_ver" ON vitaleze_secciones FOR SELECT USING (true);
 CREATE POLICY "secciones_crear" ON vitaleze_secciones FOR INSERT WITH CHECK (true);

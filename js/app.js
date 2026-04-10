@@ -366,11 +366,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 msg += `\nAguardá confirmación, ¡muchas gracias!`;
 
-                // Usamos api.whatsapp que suele fallar menos que wa.me en algunos navegadores móviles (como Safari)
-                const waUrl = `https://api.whatsapp.com/send?phone=5493512755594&text=${encodeURIComponent(msg)}`;
+                const waUrl = `https://wa.me/5493512755594?text=${encodeURIComponent(msg)}`;
                 
-                // Redirigimos la ventana actual para saltar el bloqueo de popups (popup blocker)
-                window.location.href = waUrl;
+                // Técnica a prueba de fallos para todos los navegadores (iOS/Android/Desktop)
+                const a = document.createElement('a');
+                a.href = waUrl;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
                 
                 // Reset y cerrar
                 cart = [];
@@ -382,7 +386,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error('Error al guardar:', err);
                 const waText = encodeURIComponent(`Hola Vitaleze, quiero encargar mi pedido pero hubo un error al cargar mis datos.`);
-                window.location.href = `https://api.whatsapp.com/send?phone=5493512755594&text=${waText}`;
+                const errA = document.createElement('a');
+                errA.href = `https://wa.me/5493512755594?text=${waText}`;
+                errA.target = '_blank';
+                document.body.appendChild(errA);
+                errA.click();
+                document.body.removeChild(errA);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp';
