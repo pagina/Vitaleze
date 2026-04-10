@@ -352,7 +352,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 msg += `\nAguardá confirmación, ¡muchas gracias!`;
 
-                window.open(`https://wa.me/5493512755594?text=${encodeURIComponent(msg)}`, '_blank');
+                const waUrl = `https://wa.me/5493512755594?text=${encodeURIComponent(msg)}`;
+                
+                // Redirigimos la ventana actual para saltar el bloqueo de popups (popup blocker)
+                window.location.href = waUrl;
                 
                 // Reset y cerrar
                 cart = [];
@@ -363,9 +366,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
             } catch (err) {
                 console.error('Error al guardar:', err);
-                alert('Hubo un error, pero te redirigimos igual a WhatsApp para no perder tu pedido.');
                 const waText = encodeURIComponent(`Hola Vitaleze, quiero encargar mi pedido pero hubo un error al cargar mis datos.`);
-                window.open(`https://wa.me/5493512755594?text=${waText}`, '_blank');
+                window.location.href = `https://wa.me/5493512755594?text=${waText}`;
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp';

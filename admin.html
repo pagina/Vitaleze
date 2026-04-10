@@ -72,7 +72,10 @@
                 <nav class="sidebar-nav">
                     <button class="sidebar-btn active" data-tab="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></button>
                     <button class="sidebar-btn" data-tab="products"><i class="fa-solid fa-box-open"></i><span>Productos</span></button>
-                    <button class="sidebar-btn" data-tab="orders"><i class="fa-solid fa-clipboard-list"></i><span>Pedidos</span></button>
+                    <button class="sidebar-btn" data-tab="orders">
+                        <i class="fa-solid fa-clipboard-list"></i><span>Pedidos</span>
+                        <span id="sidebar-orders-badge" style="display:none; background: #e53e3e; color: white; border-radius: 50%; padding: 2px 7px; font-size: 0.75rem; font-weight: bold; margin-left: auto;">0</span>
+                    </button>
                     <button class="sidebar-btn" data-tab="content"><i class="fa-solid fa-pen-to-square"></i><span>Contenido</span></button>
                 </nav>
             </aside>

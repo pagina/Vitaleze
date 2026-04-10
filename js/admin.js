@@ -351,13 +351,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             tbody.querySelectorAll('.order-status-select').forEach(sel => sel.addEventListener('change', async (e) => {
-                try { await DataManager.updateOrderStatus(e.target.dataset.id, e.target.value); showToast('Estado actualizado ✓'); loadOrders(); }
+                try { 
+                    await DataManager.updateOrderStatus(e.target.dataset.id, e.target.value); 
+                    showToast('Estado actualizado ✓'); 
+                    loadOrders(); 
+                    checkPendingOrdersBadge(); // Actualiza campana
+                }
                 catch (err) { showToast('Error: ' + err.message, 'error'); }
             }));
 
             tbody.querySelectorAll('.delete-order').forEach(btn => btn.addEventListener('click', async () => {
                 if (!confirm('¿Eliminar pedido?')) return;
-                try { await DataManager.deleteOrder(btn.dataset.id); showToast('Pedido eliminado ✓'); loadOrders(); }
+                try { 
+                    await DataManager.deleteOrder(btn.dataset.id); 
+                    showToast('Pedido eliminado ✓'); 
+                    loadOrders(); 
+                    checkPendingOrdersBadge(); // Actualiza campana
+                }
                 catch (err) { showToast('Error: ' + err.message, 'error'); }
             }));
         } catch (e) {
@@ -429,4 +439,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ---- INIT ----
     checkSession();
+
+    // ---- NOTIFICACIONES GLOBALES EN TIEMPO REAL (FALSO) ----
+    async function checkPendingOrdersBadge() {
+        try {
+            const orders = await DataManager.getOrders();
+            const pending = orders.filter(o => o.estado === 'Pendiente');
+            const badge = document.getElementById('sidebar-orders-badge');
+            
+            if (badge) {
+                if (pending.length > 0) {
+                    badge.textContent = pending.length;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            // Actualizar también los contadores visuales si estamos en el dashboard
+            const statPending = document.getElementById('stat-pending');
+            if (statPending) statPending.textContent = pending.length;
+            
+        } catch (e) {
+            // silencio
+        }
+    }
+
+    // Comprobar notificaciones al inicio y luego cada 15 segundos
+    checkPendingOrdersBadge();
+    setInterval(checkPendingOrdersBadge, 15000);
+
 });

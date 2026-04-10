@@ -20,9 +20,9 @@ ALTER TABLE vitaleze_pedidos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vitaleze_secciones ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "productos_ver" ON vitaleze_productos FOR SELECT USING (true);
-CREATE POLICY "productos_crear" ON vitaleze_productos FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "productos_editar" ON vitaleze_productos FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "productos_borrar" ON vitaleze_productos FOR DELETE TO authenticated USING (true);
+CREATE POLICY "productos_crear" ON vitaleze_productos FOR INSERT WITH CHECK (true);
+CREATE POLICY "productos_editar" ON vitaleze_productos FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "productos_borrar" ON vitaleze_productos FOR DELETE USING (true);
 
 CREATE POLICY "pedidos_crear" ON vitaleze_pedidos FOR INSERT WITH CHECK (true);
 CREATE POLICY "pedidos_ver" ON vitaleze_pedidos FOR SELECT TO authenticated USING (true);
@@ -30,6 +30,6 @@ CREATE POLICY "pedidos_editar" ON vitaleze_pedidos FOR UPDATE TO authenticated U
 CREATE POLICY "pedidos_borrar" ON vitaleze_pedidos FOR DELETE TO authenticated USING (true);
 
 CREATE POLICY "secciones_ver" ON vitaleze_secciones FOR SELECT USING (true);
-CREATE POLICY "secciones_crear" ON vitaleze_secciones FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "secciones_editar" ON vitaleze_secciones FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "secciones_borrar" ON vitaleze_secciones FOR DELETE TO authenticated USING (true);
+CREATE POLICY "secciones_crear" ON vitaleze_secciones FOR INSERT WITH CHECK (true);
+CREATE POLICY "secciones_editar" ON vitaleze_secciones FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "secciones_borrar" ON vitaleze_secciones FOR DELETE USING (true);
