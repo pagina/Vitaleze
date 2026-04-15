@@ -11,16 +11,37 @@ var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 var LOCAL_PASS = 'vitaleze2026';
 
 // ---- Inicializar Supabase ----
+// El SDK se carga con async, así que puede no estar listo aún.
+// Intentamos init inmediato + reintento después.
 var sb = null;
-try {
-    if (typeof window !== 'undefined' && window.supabase) {
-        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('✅ Supabase conectado a: ' + SUPABASE_URL);
-    } else {
-        console.warn('⚠️ Supabase SDK no se cargó');
+
+function initSupabase() {
+    if (sb) return; // ya conectado
+    try {
+        if (typeof window !== 'undefined' && window.supabase) {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('✅ Supabase conectado a: ' + SUPABASE_URL);
+        }
+    } catch (e) {
+        console.warn('⚠️ Error Supabase:', e);
     }
-} catch (e) {
-    console.warn('⚠️ Error Supabase:', e);
+}
+
+// Intento inmediato
+initSupabase();
+
+// Si no cargó aún (async), reintentar cuando el SDK termine de cargar
+if (!sb) {
+    // Reintentar cada 500ms por hasta 10 segundos
+    var sbRetries = 0;
+    var sbInterval = setInterval(function() {
+        initSupabase();
+        sbRetries++;
+        if (sb || sbRetries > 20) {
+            clearInterval(sbInterval);
+            if (!sb) console.warn('⚠️ Supabase SDK no se cargó después de 10s — usando datos locales');
+        }
+    }, 500);
 }
 
 // ---- Datos locales de respaldo ----

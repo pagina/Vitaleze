@@ -275,7 +275,7 @@
                     <label for="co-direccion">Dirección de Entrega *</label>
                     <input type="text" id="co-direccion" class="form-control" required placeholder="Calle, Número, Barrio">
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mt-4">
+                <button type="button" id="btn-checkout-wa" class="btn btn-primary w-100 mt-4">
                     <i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp
                 </button>
             </form>
@@ -286,8 +286,9 @@
     <button id="cart-floating-btn" class="cart-floating-btn" aria-label="Ver Carrito">
         <i class="fa-solid fa-cart-shopping"></i>
         <span id="cart-count" class="cart-count">0</span>
-    </button>    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    </button>
+    <!-- Supabase (async para no bloquear carga en móvil) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
     <script src="./js/data.js"></script>
     <script src="./js/app.js"></script>
 </body>

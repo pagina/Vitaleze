@@ -327,76 +327,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    if (checkoutForm) {
-        checkoutForm.addEventListener('submit', async (e) => {
+    // -------------------------------------------------------
+    // CHECKOUT: Enviar pedido por WhatsApp
+    // -------------------------------------------------------
+    // Usar el botón por ID directamente (NO buscar por type="submit")
+    var btnCheckoutWA = document.getElementById('btn-checkout-wa');
+    
+    if (btnCheckoutWA) {
+        btnCheckoutWA.addEventListener('click', function(e) {
             e.preventDefault();
-            if (cart.length === 0) {
-                alert('Agrega al menos un producto al carrito');
-                return;
-            }
-
-            const nombre = document.getElementById('co-nombre').value;
-            const telefono = document.getElementById('co-telefono').value;
-            const direccion = document.getElementById('co-direccion').value;
             
-            const submitBtn = checkoutForm.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
-
             try {
-                // Guardar pedido en base de datos
-                await DataManager.saveOrder({
-                    cliente: nombre,
-                    telefono: telefono,
-                    direccion: direccion,
-                    productos: cart,
-                    total: 0, // A coordinar, como no hay precios en DB aún
-                    fecha: new Date().toISOString()
-                });
-                
-                // Generar mensaje para WhatsApp
-                let msg = `Hola Vitaleze 🌾, ¡quisiera confirmar mi pedido!\n\n`;
-                msg += `*Mis datos:*\n`;
-                msg += `Nombre: ${nombre}\n`;
-                msg += `Tel: ${telefono}\n`;
-                msg += `Dirección: ${direccion}\n\n`;
-                msg += `*Mi pedido:*\n`;
-                cart.forEach(item => {
-                    msg += `- ${item.cantidad}x ${item.nombre}\n`;
-                });
-                msg += `\nAguardá confirmación, ¡muchas gracias!`;
+                // Validar carrito
+                if (cart.length === 0) {
+                    alert('Agrega al menos un producto al carrito');
+                    return;
+                }
 
-                const waUrl = `https://wa.me/5493512755594?text=${encodeURIComponent(msg)}`;
-                
-                // Técnica a prueba de fallos para todos los navegadores (iOS/Android/Desktop)
-                const a = document.createElement('a');
-                a.href = waUrl;
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                // Reset y cerrar
+                // Obtener valores del formulario
+                var nombre = document.getElementById('co-nombre') ? document.getElementById('co-nombre').value.trim() : '';
+                var telefono = document.getElementById('co-telefono') ? document.getElementById('co-telefono').value.trim() : '';
+                var direccion = document.getElementById('co-direccion') ? document.getElementById('co-direccion').value.trim() : '';
+
+                if (!nombre || !telefono || !direccion) {
+                    alert('Por favor completá todos los campos');
+                    return;
+                }
+
+                // Construir mensaje
+                var msg = 'Hola Vitaleze 🌾, quisiera confirmar mi pedido!\n\n';
+                msg += '*Mis datos:*\n';
+                msg += 'Nombre: ' + nombre + '\n';
+                msg += 'Tel: ' + telefono + '\n';
+                msg += 'Direccion: ' + direccion + '\n\n';
+                msg += '*Mi pedido:*\n';
+                for (var i = 0; i < cart.length; i++) {
+                    msg += '- ' + cart[i].cantidad + 'x ' + cart[i].nombre + '\n';
+                }
+                msg += '\nAguardo confirmacion, muchas gracias!';
+
+                var waUrl = 'https://wa.me/5493512755594?text=' + encodeURIComponent(msg);
+
+                // Guardar pedido en DB (fire-and-forget, no bloquea nada)
+                try {
+                    if (typeof DataManager !== 'undefined' && DataManager.saveOrder) {
+                        DataManager.saveOrder({
+                            cliente: nombre,
+                            telefono: telefono,
+                            direccion: direccion,
+                            productos: cart.slice(),
+                            total: 0,
+                            fecha: new Date().toISOString()
+                        }).catch(function() {});
+                    }
+                } catch(dbErr) {}
+
+                // Limpiar carrito
                 cart = [];
                 updateCart();
-                cartSidebar.classList.remove('active');
+                if (cartSidebar) cartSidebar.classList.remove('active');
                 if (cartOverlay) cartOverlay.classList.remove('active');
-                checkoutForm.reset();
-                
-            } catch (err) {
-                console.error('Error al guardar:', err);
-                const waText = encodeURIComponent(`Hola Vitaleze, quiero encargar mi pedido pero hubo un error al cargar mis datos.`);
-                const errA = document.createElement('a');
-                errA.href = `https://wa.me/5493512755594?text=${waText}`;
-                errA.target = '_blank';
-                document.body.appendChild(errA);
-                errA.click();
-                document.body.removeChild(errA);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Confirmar pedido por WhatsApp';
+                if (checkoutForm) checkoutForm.reset();
+
+                // *** NAVEGAR A WHATSAPP ***
+                // Usar window.location.href que es el método más confiable en TODOS los navegadores
+                // En móvil abre la app de WhatsApp nativa
+                // En desktop redirige a web.whatsapp.com
+                window.location.href = waUrl;
+
+            } catch(err) {
+                // Si algo falla, al menos mostrar el link para que el usuario lo copie
+                alert('Hubo un error. Intentá de nuevo o escribinos directamente al 351-275-5594');
+                console.error('Error checkout:', err);
             }
         });
+    } else {
+        console.error('ERROR: No se encontró el botón #btn-checkout-wa');
     }
 
 });
