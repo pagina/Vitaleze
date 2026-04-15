@@ -1,6 +1,8 @@
 // ==========================================
+// VITALEZE APP v2026.04.15b
 // Limpieza de caché viejo (PWA eliminada)
 // ==========================================
+console.log('✅ app.js v2026.04.15b cargado');
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for(let registration of registrations) {
@@ -334,8 +336,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     var btnCheckoutWA = document.getElementById('btn-checkout-wa');
     
     if (btnCheckoutWA) {
+        console.log('✅ Botón checkout encontrado, handler registrado');
         btnCheckoutWA.addEventListener('click', function(e) {
             e.preventDefault();
+            alert('DEBUG: Botón tocado! Carrito tiene ' + cart.length + ' items');
             
             try {
                 // Validar carrito
