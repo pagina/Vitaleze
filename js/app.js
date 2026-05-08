@@ -184,9 +184,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             content.className = 'product-content';
             content.innerHTML = `
                 <h3 class="product-title">${p.nombre}</h3>
+                <span class="product-price">${formatPrecio(p.precio)}</span>
                 <p class="product-desc">${p.descripcion || ''}</p>
                 ${p.ingredientes ? `<div class="product-ingredients"><strong>Ingredientes:</strong> ${p.ingredientes}</div>` : ''}
-                <button class="btn btn-primary w-100 mt-2 btn-add-cart" data-id="${p.id}" data-nombre="${p.nombre}">
+                <button class="btn btn-primary w-100 mt-2 btn-add-cart" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio || 0}">
                     <i class="fa-solid fa-cart-shopping"></i> Agregar
                 </button>
             `;
@@ -200,7 +201,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.addEventListener('click', (e) => {
                 const pId = btn.dataset.id;
                 const pNombre = btn.dataset.nombre;
-                addToCart(pId, pNombre);
+                const pPrecio = Number(btn.dataset.precio) || 0;
+                addToCart(pId, pNombre, pPrecio);
                 
                 // Efecto de feedback visual rápido
                 const originalText = btn.innerHTML;
@@ -257,12 +259,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    window.addToCart = function(id, nombre) {
+    window.addToCart = function(id, nombre, precio) {
         const existing = cart.find(i => i.id === id);
         if (existing) {
             existing.cantidad++;
         } else {
-            cart.push({ id, nombre, cantidad: 1 });
+            cart.push({ id, nombre, precio: precio || 0, cantidad: 1 });
         }
         updateCart();
     };
@@ -280,22 +282,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<p class="text-muted text-center py-4">Tu carrito está vacío.</p>';
+            // Limpiar total
+            const totalEl = document.getElementById('cart-total');
+            if (totalEl) totalEl.style.display = 'none';
             return;
         }
 
-        cartItemsContainer.innerHTML = cart.map(item => `
+        // Calcular total general
+        const cartTotal = cart.reduce((sum, item) => sum + (item.precio || 0) * item.cantidad, 0);
+
+        cartItemsContainer.innerHTML = cart.map(item => {
+            const subtotal = (item.precio || 0) * item.cantidad;
+            const precioStr = item.precio > 0 ? formatPrecio(item.precio) : '';
+            const subtotalStr = (item.precio > 0 && item.cantidad > 1) ? `<span class="cart-item-subtotal">Subtotal: ${formatPrecio(subtotal)}</span>` : '';
+            return `
             <div class="cart-item">
                 <div class="cart-item-info">
                     <span class="cart-item-name">${item.nombre}</span>
-                    <span class="cart-item-qty">Cantidad: ${item.cantidad}</span>
+                    <span class="cart-item-qty">Cantidad: ${item.cantidad}${precioStr ? ' × ' + precioStr : ''}</span>
+                    ${subtotalStr}
                 </div>
                 <div class="cart-item-actions">
                     <button type="button" class="btn-qty-minus" data-id="${item.id}" aria-label="Restar">-</button>
                     <button type="button" class="btn-qty-plus" data-id="${item.id}" aria-label="Sumar">+</button>
                     <button type="button" class="btn-remove-item" data-id="${item.id}" aria-label="Eliminar"><i class="fa-solid fa-trash text-muted"></i></button>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
+
+        // Mostrar total general
+        let totalEl = document.getElementById('cart-total');
+        if (!totalEl) {
+            totalEl = document.createElement('div');
+            totalEl.id = 'cart-total';
+            totalEl.className = 'cart-total';
+            cartItemsContainer.parentElement.insertBefore(totalEl, cartItemsContainer.nextSibling);
+        }
+        if (cartTotal > 0) {
+            totalEl.innerHTML = '<strong>Total: ' + formatPrecio(cartTotal) + '</strong>';
+            totalEl.style.display = 'block';
+        } else {
+            totalEl.style.display = 'none';
+        }
 
         // Eventos a los botones internos del carrito
         cartItemsContainer.querySelectorAll('.btn-remove-item').forEach(btn => {
@@ -339,7 +367,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('✅ Botón checkout encontrado, handler registrado');
         btnCheckoutWA.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('DEBUG: Botón tocado! Carrito tiene ' + cart.length + ' items');
             
             try {
                 // Validar carrito
@@ -358,7 +385,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                // Construir mensaje
+                // Construir mensaje con precios
+                var totalPedido = 0;
                 var msg = 'Hola Vitaleze 🌾, quisiera confirmar mi pedido!\n\n';
                 msg += '*Mis datos:*\n';
                 msg += 'Nombre: ' + nombre + '\n';
@@ -366,7 +394,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 msg += 'Direccion: ' + direccion + '\n\n';
                 msg += '*Mi pedido:*\n';
                 for (var i = 0; i < cart.length; i++) {
-                    msg += '- ' + cart[i].cantidad + 'x ' + cart[i].nombre + '\n';
+                    var itemPrecio = Number(cart[i].precio) || 0;
+                    var itemSubtotal = itemPrecio * cart[i].cantidad;
+                    totalPedido += itemSubtotal;
+                    msg += '- ' + cart[i].cantidad + 'x ' + cart[i].nombre;
+                    if (itemPrecio > 0) msg += ' (' + formatPrecio(itemPrecio) + ' c/u)';
+                    msg += '\n';
+                }
+                if (totalPedido > 0) {
+                    msg += '\n*Total: ' + formatPrecio(totalPedido) + '*';
                 }
                 msg += '\nAguardo confirmacion, muchas gracias!';
 
@@ -380,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             telefono: telefono,
                             direccion: direccion,
                             productos: cart.slice(),
-                            total: 0,
+                            total: totalPedido,
                             fecha: new Date().toISOString()
                         }).catch(function() {});
                     }

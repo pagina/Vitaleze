@@ -543,6 +543,32 @@ img {
     margin-bottom: 1rem;
 }
 
+.product-price {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Carrito: subtotales y total */
+.cart-item-subtotal {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-top: 0.15rem;
+}
+
+.cart-total {
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-alt);
+    border-top: 2px solid var(--color-primary);
+    text-align: right;
+    font-size: 1.15rem;
+    color: var(--color-primary);
+}
+
 /* Catalog Notice */
 .catalog-notice {
     margin-top: var(--spacing-lg);

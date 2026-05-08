@@ -16,9 +16,13 @@ CREATE TABLE IF NOT EXISTS vitaleze_productos (
     categoria TEXT,
     descripcion TEXT,
     ingredientes TEXT,
+    precio NUMERIC DEFAULT 0,
     imagen TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Agregar columna precio si la tabla ya existe
+ALTER TABLE vitaleze_productos ADD COLUMN IF NOT EXISTS precio NUMERIC DEFAULT 0;
 
 -- ==========================================
 -- TABLA: PEDIDOS

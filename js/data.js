@@ -31,16 +31,23 @@ if (!sb) console.warn('⚠️ Supabase SDK no disponible — usando datos locale
 
 // ---- Datos locales de respaldo ----
 var FALLBACK_PRODUCTS = [
-    { id: 'f1', nombre: 'Dona de Chocolate Keto', categoria: 'Keto', descripcion: 'Exquisita dona keto, esponjosa y bañada en auténtico chocolate 70% cacao. El equilibrio perfecto entre sabor y nutrición.', ingredientes: 'Chocolate 70% cacao, harina de almendra, stevia.', imagen: './imagenes/dona.png' },
-    { id: 'f2', nombre: 'Pan de Almendras (Keto)', categoria: 'Panadería, Keto', descripcion: 'Nuestro pan de almendras destaca por su textura noble y gran aporte nutricional. Una opción premium para realzar tus desayunos.', ingredientes: 'Harina de almendras, huevo, sal marina.', imagen: './imagenes/pan de almendras.png' },
-    { id: 'f3', nombre: 'Pan Nube Keto', categoria: 'Panadería, Keto', descripcion: 'Ligero como el aire. Este pan keto sin carbohidratos es la opción más liviana y deliciosa para acompañar tus comidas diarias sin culpa.', ingredientes: 'Huevo, leche en polvo descremada y ajo.', imagen: './imagenes/pan nube keto.jpg' },
-    { id: 'f4', nombre: 'Pan Nube Tradicional', categoria: 'Panadería', descripcion: 'Descubrí la textura única de nuestro pan tradicional. Increíblemente esponjoso, aireado al paladar y sumamente versátil.', ingredientes: 'Huevo, queso crema seleccionado.', imagen: './imagenes/pan nube.png' },
-    { id: 'f5', nombre: 'Galletas de Avena y Pasas', categoria: 'Snacks', descripcion: 'Galletas crujientes horneadas pacientemente, elaboradas con avena 100% integral. El snack natural, dulce y repleto de fibra.', ingredientes: 'Avena integral, pasas de uva, miel natural.', imagen: './imagenes/galletas.png' },
-    { id: 'f6', nombre: 'Pan Integral de Masa Madre', categoria: 'Panadería', descripcion: 'Pan artesanal con fermentación natural prolongada. Realza los sabores auténticos y favorece la digestión. Un clásico indispensable.', ingredientes: 'Harina integral, semillas de lino, chía, masa madre.', imagen: './imagenes/pan integral.png' },
-    { id: 'f7', nombre: 'Granola', categoria: 'Snacks', descripcion: 'Exclusiva mezcla de cereales tostados a la perfección. Aporta ese toque dulce y crujiente ideal para tus bowls y yogures diarios.', ingredientes: 'Avena, nueces, almendras, miel.', imagen: './imagenes/granola.png' },
-    { id: 'f8', nombre: 'Almohaditas Rellenas (1/2kg)', categoria: 'Frutos Secos, Snacks', descripcion: 'Pequeñas delicias de cereal crocante con un corazón suave y sabroso. En formato ideal para disfrutar como snack dulce o desayuno.', ingredientes: 'Cereal de trigo, relleno variado.', imagen: './imagenes/almohaditas de 1,2 kg.png' },
-    { id: 'f9', nombre: 'Frutos Secos 1/2 kg', categoria: 'Frutos Secos', descripcion: 'Selección premium de los mejores frutos: nueces enteras, almendras tostadas, maní y pasas dulces. Energía 100% natural, lista para consumir.', ingredientes: 'Nueces, almendras, maní, pasas de uva.', imagen: './imagenes/fruto secos 1,2 kg.jpg' }
+    { id: 'f1', nombre: 'Dona de Chocolate Keto', categoria: 'Keto', descripcion: 'Exquisita dona keto, esponjosa y bañada en auténtico chocolate 70% cacao. El equilibrio perfecto entre sabor y nutrición.', ingredientes: 'Chocolate 70% cacao, harina de almendra, stevia.', precio: 0, imagen: './imagenes/dona.png' },
+    { id: 'f2', nombre: 'Pan de Almendras (Keto)', categoria: 'Panadería, Keto', descripcion: 'Nuestro pan de almendras destaca por su textura noble y gran aporte nutricional. Una opción premium para realzar tus desayunos.', ingredientes: 'Harina de almendras, huevo, sal marina.', precio: 0, imagen: './imagenes/pan de almendras.png' },
+    { id: 'f3', nombre: 'Pan Nube Keto', categoria: 'Panadería, Keto', descripcion: 'Ligero como el aire. Este pan keto sin carbohidratos es la opción más liviana y deliciosa para acompañar tus comidas diarias sin culpa.', ingredientes: 'Huevo, leche en polvo descremada y ajo.', precio: 0, imagen: './imagenes/pan nube keto.jpg' },
+    { id: 'f4', nombre: 'Pan Nube Tradicional', categoria: 'Panadería', descripcion: 'Descubrí la textura única de nuestro pan tradicional. Increíblemente esponjoso, aireado al paladar y sumamente versátil.', ingredientes: 'Huevo, queso crema seleccionado.', precio: 0, imagen: './imagenes/pan nube.png' },
+    { id: 'f5', nombre: 'Galletas de Avena y Pasas', categoria: 'Snacks', descripcion: 'Galletas crujientes horneadas pacientemente, elaboradas con avena 100% integral. El snack natural, dulce y repleto de fibra.', ingredientes: 'Avena integral, pasas de uva, miel natural.', precio: 0, imagen: './imagenes/galletas.png' },
+    { id: 'f6', nombre: 'Pan Integral de Masa Madre', categoria: 'Panadería', descripcion: 'Pan artesanal con fermentación natural prolongada. Realza los sabores auténticos y favorece la digestión. Un clásico indispensable.', ingredientes: 'Harina integral, semillas de lino, chía, masa madre.', precio: 0, imagen: './imagenes/pan integral.png' },
+    { id: 'f7', nombre: 'Granola', categoria: 'Snacks', descripcion: 'Exclusiva mezcla de cereales tostados a la perfección. Aporta ese toque dulce y crujiente ideal para tus bowls y yogures diarios.', ingredientes: 'Avena, nueces, almendras, miel.', precio: 0, imagen: './imagenes/granola.png' },
+    { id: 'f8', nombre: 'Almohaditas Rellenas (1/2kg)', categoria: 'Frutos Secos, Snacks', descripcion: 'Pequeñas delicias de cereal crocante con un corazón suave y sabroso. En formato ideal para disfrutar como snack dulce o desayuno.', ingredientes: 'Cereal de trigo, relleno variado.', precio: 0, imagen: './imagenes/almohaditas de 1,2 kg.png' },
+    { id: 'f9', nombre: 'Frutos Secos 1/2 kg', categoria: 'Frutos Secos', descripcion: 'Selección premium de los mejores frutos: nueces enteras, almendras tostadas, maní y pasas dulces. Energía 100% natural, lista para consumir.', ingredientes: 'Nueces, almendras, maní, pasas de uva.', precio: 0, imagen: './imagenes/fruto secos 1,2 kg.jpg' }
 ];
+
+// Helper global para formatear precios en ARS
+function formatPrecio(precio) {
+    var n = Number(precio);
+    if (!n || n <= 0) return 'Consultar precio';
+    return '$ ' + n.toLocaleString('es-AR');
+}
 
 var FALLBACK_SECTIONS = {
     hero_h1: { valor: 'Alimentación saludable a <span class="text-gradient">tu alcance</span>' },
@@ -103,10 +110,13 @@ class DataManager {
     }
 
     static async saveProduct(productData) {
+        if (!sb) initSupabase();
         if (!sb) throw new Error('Supabase no conectado. Ejecutá el SQL primero.');
         var payload = {};
         for (var key in productData) { payload[key] = productData[key]; }
         if (!payload.id || payload.id === '') delete payload.id;
+        // Asegurar que precio sea numérico
+        if (payload.precio !== undefined) payload.precio = Number(payload.precio) || 0;
 
         var r = await sb.from('vitaleze_productos').upsert([payload], { onConflict: 'id' }).select();
         if (r.error) throw new Error(r.error.message);

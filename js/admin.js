@@ -207,6 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('p-categoria').value = p ? p.categoria : '';
         document.getElementById('p-descripcion').value = p ? p.descripcion : '';
         document.getElementById('p-ingredientes').value = p ? (p.ingredientes || '') : '';
+        document.getElementById('p-precio').value = p ? (p.precio || '') : '';
         document.getElementById('p-imagen').value = p ? (p.imagen || '') : '';
         imgPreview.src = p?.imagen || './imagenes/logo.png';
         imgPreview.onerror = function () { this.onerror = null; this.src = './imagenes/logo.png'; };
@@ -236,6 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             categoria: document.getElementById('p-categoria').value.trim(),
             descripcion: document.getElementById('p-descripcion').value.trim(),
             ingredientes: document.getElementById('p-ingredientes').value.trim(),
+            precio: Number(document.getElementById('p-precio').value) || 0,
             imagen: document.getElementById('p-imagen').value.trim()
         };
         const editId = document.getElementById('p-id').value;
@@ -275,6 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="admin-p-card-body">
                         <h4>${p.nombre}</h4>
                         <span class="p-cat">${p.categoria || ''}</span>
+                        <span class="p-price" style="display:block;font-weight:700;color:#4A7C59;font-size:1.1em;margin:0.25rem 0;">${formatPrecio(p.precio)}</span>
                         <p class="p-desc">${p.descripcion || ''}</p>
                         ${p.ingredientes ? `<div class="p-ingredients"><strong>Ingredientes:</strong> ${p.ingredientes}</div>` : ''}
                         <div class="admin-p-actions">
@@ -310,14 +313,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadOrders() {
         const tbody = document.getElementById('orders-list');
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Cargando...</td></tr>';
         try {
             const orders = await DataManager.getOrders();
             const filtered = orderFilter === 'all' ? orders : orders.filter(o => o.estado === orderFilter);
             tbody.innerHTML = '';
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>${orderFilter === 'all' ? 'No hay pedidos' : 'Sin pedidos con este estado'}</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>${orderFilter === 'all' ? 'No hay pedidos' : 'Sin pedidos con este estado'}</p></div></td></tr>`;
                 return;
             }
 
@@ -335,9 +338,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const telDir = `${o.telefono || '-'} <br><small class="text-muted">${o.direccion || '-'}</small>`;
 
+                // Calcular total del pedido
+                let orderTotal = Number(o.total) || 0;
+                if (!orderTotal && Array.isArray(o.productos)) {
+                    orderTotal = o.productos.reduce((sum, p) => sum + ((Number(p.precio) || 0) * (p.cantidad || 1)), 0);
+                }
+                const totalStr = orderTotal > 0 ? formatPrecio(orderTotal) : '-';
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${d}</td><td>${o.cliente}</td><td>${telDir}</td><td><div style="max-height:80px;overflow-y:auto;font-size:0.85em;">${pName}</div></td>
+                    <td style="font-weight:700;color:#4A7C59;white-space:nowrap;">${totalStr}</td>
                     <td><span class="status-badge ${statusClass(o.estado)}">${o.estado}</span></td>
                     <td><div class="order-actions">
                         <select class="order-status-select" data-id="${o.id}">

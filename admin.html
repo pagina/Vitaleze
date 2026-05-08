@@ -144,6 +144,10 @@
                                 <textarea id="p-ingredientes" class="form-control" rows="2" placeholder="Ej: Harina de almendras, huevos, stevia..."></textarea>
                             </div>
                             <div class="form-group">
+                                <label for="p-precio">Precio (ARS)</label>
+                                <input type="number" id="p-precio" class="form-control" min="0" step="1" placeholder="Ej: 1500">
+                            </div>
+                            <div class="form-group">
                                 <label>Imagen del Producto</label>
                                 <div class="image-upload-area">
                                     <div class="image-preview-box">
@@ -185,8 +189,8 @@
                     </div>
                     <div class="orders-container">
                         <table class="admin-table">
-                            <thead><tr><th>Fecha</th><th>Cliente</th><th>Tel / Dirección</th><th>Productos</th><th>Estado</th><th>Acciones</th></tr></thead>
-                            <tbody id="orders-list"><tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr></tbody>
+                            <thead><tr><th>Fecha</th><th>Cliente</th><th>Tel / Dirección</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="orders-list"><tr><td colspan="7" class="text-center text-muted">Cargando...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -261,7 +265,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./js/data.js?v=20260508b"></script>
-    <script src="./js/admin.js?v=20260508b"></script>
+    <script src="./js/data.js?v=20260508c"></script>
+    <script src="./js/admin.js?v=20260508c"></script>
 </body>
 </html>
