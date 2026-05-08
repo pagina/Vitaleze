@@ -14,6 +14,14 @@ var LOCAL_PASS = 'vitaleze2026';
 // El SDK se carga con async, así que puede no estar listo aún.
 // Intentamos init inmediato + reintento después.
 var sb = null;
+var _sbReadyCallbacks = [];
+var _sbDidConnect = false;
+
+// Registrar callback para cuando Supabase conecte
+function onSupabaseReady(fn) {
+    if (_sbDidConnect) { fn(); return; }
+    _sbReadyCallbacks.push(fn);
+}
 
 function initSupabase() {
     if (sb) return; // ya conectado
@@ -21,6 +29,10 @@ function initSupabase() {
         if (typeof window !== 'undefined' && window.supabase) {
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log('✅ Supabase conectado a: ' + SUPABASE_URL);
+            _sbDidConnect = true;
+            // Ejecutar callbacks pendientes
+            _sbReadyCallbacks.forEach(function(cb) { try { cb(); } catch(e) {} });
+            _sbReadyCallbacks = [];
         }
     } catch (e) {
         console.warn('⚠️ Error Supabase:', e);
@@ -73,6 +85,19 @@ class DataManager {
 
     // ===== PRODUCTOS =====
     static async getProducts() {
+        // Si sb no está listo aún, esperar un momento por si está cargando
+        if (!sb && !_sbDidConnect) {
+            await new Promise(function(resolve) {
+                var waited = 0;
+                var check = setInterval(function() {
+                    waited += 100;
+                    if (sb || waited >= 3000) {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
         if (sb) {
             try {
                 var r = await sb.from('vitaleze_productos').select('*').order('created_at', { ascending: true });
@@ -115,6 +140,19 @@ class DataManager {
 
     // ===== SECCIONES =====
     static async getSections() {
+        // Esperar a que Supabase esté listo (misma lógica que getProducts)
+        if (!sb && !_sbDidConnect) {
+            await new Promise(function(resolve) {
+                var waited = 0;
+                var check = setInterval(function() {
+                    waited += 100;
+                    if (sb || waited >= 3000) {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
         if (sb) {
             try {
                 var r = await sb.from('vitaleze_secciones').select('*');
