@@ -1,60 +1,33 @@
 // =============================================
 // VITALEZE 🌾 — CAPA DE DATOS
 // Supabase (primario) + fallback local
-// Proyecto: ienszeqwyqrvlewoaasv
+// Proyecto: obtowengfikyyvekywyh
 // =============================================
 
-var SUPABASE_URL = 'https://ienszeqwyqrvlewoaasv.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllbnN6ZXF3eXFydmxld29hYXN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDEzNTIsImV4cCI6MjA5MTMxNzM1Mn0.4WVf1cCVzThCQaDIdIEDT3LXYzr4EI0CS-HUWaTf6qI';
+var SUPABASE_URL = 'https://obtowengfikyyvekywyh.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9idG93ZW5nZmlreXl2ZWt5d3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNTQzNDEsImV4cCI6MjA5MzgzMDM0MX0.2CDTT-Zfp7cdx5U23V0SmCWNKpHZxkcZSzdo5zEGocM';
 
 // Contraseña local de emergencia (siempre funciona)
 var LOCAL_PASS = 'vitaleze2026';
 
 // ---- Inicializar Supabase ----
-// El SDK se carga con async, así que puede no estar listo aún.
-// Intentamos init inmediato + reintento después.
+// El SDK se carga de forma síncrona antes de data.js, así que siempre está disponible.
 var sb = null;
-var _sbReadyCallbacks = [];
-var _sbDidConnect = false;
-
-// Registrar callback para cuando Supabase conecte
-function onSupabaseReady(fn) {
-    if (_sbDidConnect) { fn(); return; }
-    _sbReadyCallbacks.push(fn);
-}
 
 function initSupabase() {
-    if (sb) return; // ya conectado
+    if (sb) return;
     try {
         if (typeof window !== 'undefined' && window.supabase) {
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log('✅ Supabase conectado a: ' + SUPABASE_URL);
-            _sbDidConnect = true;
-            // Ejecutar callbacks pendientes
-            _sbReadyCallbacks.forEach(function(cb) { try { cb(); } catch(e) {} });
-            _sbReadyCallbacks = [];
         }
     } catch (e) {
         console.warn('⚠️ Error Supabase:', e);
     }
 }
 
-// Intento inmediato
 initSupabase();
-
-// Si no cargó aún (async), reintentar cuando el SDK termine de cargar
-if (!sb) {
-    // Reintentar cada 500ms por hasta 10 segundos
-    var sbRetries = 0;
-    var sbInterval = setInterval(function() {
-        initSupabase();
-        sbRetries++;
-        if (sb || sbRetries > 20) {
-            clearInterval(sbInterval);
-            if (!sb) console.warn('⚠️ Supabase SDK no se cargó después de 10s — usando datos locales');
-        }
-    }, 500);
-}
+if (!sb) console.warn('⚠️ Supabase SDK no disponible — usando datos locales');
 
 // ---- Datos locales de respaldo ----
 var FALLBACK_PRODUCTS = [
@@ -85,25 +58,33 @@ class DataManager {
 
     // ===== PRODUCTOS =====
     static async getProducts() {
-        // Si sb no está listo aún, esperar un momento por si está cargando
-        if (!sb && !_sbDidConnect) {
-            await new Promise(function(resolve) {
-                var waited = 0;
-                var check = setInterval(function() {
-                    waited += 100;
-                    if (sb || waited >= 3000) {
-                        clearInterval(check);
-                        resolve();
-                    }
-                }, 100);
-            });
-        }
+        // Reintentar inicializar Supabase si aún no conectó (conexión lenta en móvil)
+        if (!sb) initSupabase();
+
         if (sb) {
             try {
                 var r = await sb.from('vitaleze_productos').select('*').order('created_at', { ascending: true });
                 if (!r.error && r.data && r.data.length > 0) return r.data;
-            } catch (e) { console.warn('getProducts error:', e); }
+            } catch (e) { console.warn('getProducts SDK error:', e); }
         }
+
+        // Fallback: intentar con fetch directo (funciona sin el SDK)
+        try {
+            var resp = await fetch(SUPABASE_URL + '/rest/v1/vitaleze_productos?select=*&order=created_at.asc', {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                }
+            });
+            if (resp.ok) {
+                var data = await resp.json();
+                if (data && data.length > 0) {
+                    console.log('✅ Productos cargados via fetch directo:', data.length);
+                    return data;
+                }
+            }
+        } catch (e2) { console.warn('getProducts fetch error:', e2); }
+
         return FALLBACK_PRODUCTS;
     }
 
@@ -140,19 +121,8 @@ class DataManager {
 
     // ===== SECCIONES =====
     static async getSections() {
-        // Esperar a que Supabase esté listo (misma lógica que getProducts)
-        if (!sb && !_sbDidConnect) {
-            await new Promise(function(resolve) {
-                var waited = 0;
-                var check = setInterval(function() {
-                    waited += 100;
-                    if (sb || waited >= 3000) {
-                        clearInterval(check);
-                        resolve();
-                    }
-                }, 100);
-            });
-        }
+        if (!sb) initSupabase();
+
         if (sb) {
             try {
                 var r = await sb.from('vitaleze_secciones').select('*');
@@ -163,8 +133,30 @@ class DataManager {
                     });
                     return obj;
                 }
-            } catch (e) { console.warn('getSections error:', e); }
+            } catch (e) { console.warn('getSections SDK error:', e); }
         }
+
+        // Fallback: fetch directo
+        try {
+            var resp = await fetch(SUPABASE_URL + '/rest/v1/vitaleze_secciones?select=*', {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                }
+            });
+            if (resp.ok) {
+                var data = await resp.json();
+                if (data && data.length > 0) {
+                    var obj = {};
+                    data.forEach(function(row) {
+                        obj[row.clave] = { valor: row.valor, imagen_url: row.imagen_url };
+                    });
+                    console.log('✅ Secciones cargadas via fetch directo');
+                    return obj;
+                }
+            }
+        } catch (e2) { console.warn('getSections fetch error:', e2); }
+
         return FALLBACK_SECTIONS;
     }
 
