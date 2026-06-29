@@ -38,7 +38,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (sections['hero_img']?.imagen_url) {
                 const heroImg = document.getElementById('hero-img');
-                if (heroImg) heroImg.src = sections['hero_img'].imagen_url;
+                if (heroImg) {
+                    var heroSrc = sections['hero_img'].imagen_url;
+                    // Validar base64 truncadas
+                    if (heroSrc.startsWith('data:') && heroSrc.length < 200) {
+                        console.warn('Hero imagen base64 truncada, usando default');
+                    } else {
+                        heroImg.onerror = function() { this.onerror = null; this.src = './imagenes/hero-demo.jpg'; };
+                        heroImg.src = heroSrc;
+                    }
+                }
             }
 
             // About Section
@@ -52,7 +61,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (sections['about_img']?.imagen_url) {
                 const aboutImg = document.getElementById('about-img');
-                if (aboutImg) aboutImg.src = sections['about_img'].imagen_url;
+                if (aboutImg) {
+                    var aboutSrc = sections['about_img'].imagen_url;
+                    if (aboutSrc.startsWith('data:') && aboutSrc.length < 200) {
+                        console.warn('About imagen base64 truncada, usando default');
+                    } else {
+                        aboutImg.onerror = function() { this.onerror = null; this.src = './imagenes/about-demo.jpg'; };
+                        aboutImg.src = aboutSrc;
+                    }
+                }
             }
         } catch (e) {
             console.warn('Error cargando secciones dinámicas:', e);
@@ -66,6 +83,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const productsPromise = renderProducts('all').catch(e => console.error('Error productos:', e));
 
         await Promise.all([sectionsPromise, filtersPromise, productsPromise]);
+
+        // Mostrar carrito restaurado desde localStorage
+        if (cart.length > 0) updateCart();
     }
 
     init();
@@ -123,13 +143,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Helper: crear imagen con fallback
+    // Helper: crear imagen con fallback robusto
+    // Maneja imágenes base64 corruptas/truncadas que salen negras
     function createProductImage(src, alt) {
         const img = document.createElement('img');
         img.className = 'product-img';
         img.loading = 'lazy';
         img.alt = alt;
-        img.src = src || './imagenes/logo.png';
+        img.style.background = '#f3f4f1'; // fondo claro por defecto para evitar flash negro
+        
+        // Validar la fuente de la imagen
+        let validSrc = './imagenes/logo.png'; // default fallback
+        
+        if (src && typeof src === 'string') {
+            if (src.startsWith('data:image/')) {
+                // Es base64 — verificar que no esté truncada/corrupta
+                // Un base64 válido de imagen real tiene al menos ~200 chars después del header
+                var commaIndex = src.indexOf(',');
+                if (commaIndex > 0 && src.length > commaIndex + 100) {
+                    validSrc = src;
+                } else {
+                    console.warn('Imagen base64 truncada para:', alt);
+                }
+            } else if (src.trim() !== '') {
+                // URL normal o ruta de archivo
+                validSrc = src;
+            }
+        }
+        
+        img.src = validSrc;
         
         // Fallback si la imagen no carga
         img.onerror = function() {
@@ -138,6 +180,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             this.style.objectFit = 'contain';
             this.style.padding = '2rem';
             this.style.background = '#f3f4f1';
+        };
+        
+        // Detectar imágenes que cargan pero son "negras" (1x1 px o muy pequeñas)
+        img.onload = function() {
+            if (this.naturalWidth <= 1 || this.naturalHeight <= 1) {
+                this.onerror = null;
+                this.src = './imagenes/logo.png';
+                this.style.objectFit = 'contain';
+                this.style.padding = '2rem';
+                this.style.background = '#f3f4f1';
+            }
         };
         
         return img;
@@ -230,7 +283,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     // -------------------------------------------------------------
     // 3. Lógica del Carrito de Compras
     // -------------------------------------------------------------
-    let cart = [];
+    const CART_KEY = 'vitaleze_cart';
+
+    function saveCart() {
+        try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch(_) {}
+    }
+
+    function loadCart() {
+        try {
+            const saved = localStorage.getItem(CART_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) return parsed;
+            }
+        } catch(_) {}
+        return [];
+    }
+
+    let cart = loadCart();
     
     const cartFloatingBtn = document.getElementById('cart-floating-btn');
     const cartCount = document.getElementById('cart-count');
@@ -271,6 +341,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateCart() {
         if (!cartCount || !cartItemsContainer) return;
+
+        // Persistir carrito en localStorage
+        saveCart();
 
         // Actualizar contador
         const totalItems = cart.reduce((sum, item) => sum + item.cantidad, 0);
@@ -408,6 +481,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 var waUrl = 'https://wa.me/5493512755594?text=' + encodeURIComponent(msg);
 
+                // ── MAKE.COM: Enviar pedido automáticamente ──
+                try {
+                    var MAKE_WEBHOOK = 'https://hook.us2.make.com/t0h4fngbbk1tv21hygulft6vv34fpbba';
+
+                    var itemsTexto = cart.map(function(item) {
+                        return item.nombre + ' x' + item.cantidad + ' ($' + (item.precio * item.cantidad) + ')';
+                    }).join(', ');
+
+                    fetch(MAKE_WEBHOOK, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre:    nombre,
+                            telefono:  telefono,
+                            direccion: direccion,
+                            productos: itemsTexto,
+                            total:     totalPedido,
+                            fecha:     new Date().toLocaleString('es-AR')
+                        })
+                    })
+                    .catch(function(err) { console.error('Make webhook error:', err); });
+                } catch(makeErr) {
+                    console.error('Make webhook error:', makeErr);
+                }
+                // ── Fin Make.com ──
+
                 // Guardar pedido en DB (fire-and-forget, no bloquea nada)
                 try {
                     if (typeof DataManager !== 'undefined' && DataManager.saveOrder) {
@@ -424,6 +523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Limpiar carrito
                 cart = [];
+                saveCart();
                 updateCart();
                 if (cartSidebar) cartSidebar.classList.remove('active');
                 if (cartOverlay) cartOverlay.classList.remove('active');
