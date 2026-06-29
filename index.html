@@ -34,7 +34,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="./css/style.css?v=20260603a">
+    <link rel="stylesheet" href="./css/style.css?v=20260603b">
 </head>
 
 <body>
@@ -121,38 +121,44 @@
 
         <!-- Catálogo de Productos -->
         <section id="productos" class="products section-padding">
-            <div class="container">
-                <div class="section-header text-center">
-                    <h2 class="section-title">Nuestro Catálogo</h2>
-                    <p>Explora nuestras deliciosas opciones y elegí tus favoritos.</p>
-                </div>
+            <div class="container catalog-layout">
 
-                <!-- Filters -->
-                <div class="product-filters" id="product-filters">
-                    <button class="filter-btn active" data-filter="all">Todos</button>
-                    <!-- Las categorías se generarán dinámicamente -->
-                </div>
+                <!-- Columna izquierda: Sidebar sticky con título y filtros -->
+                <aside class="catalog-sidebar">
+                    <div class="catalog-sidebar-inner">
+                        <h2 class="section-title">Nuestro Catálogo</h2>
+                        <p class="catalog-sidebar-desc">Explora nuestras deliciosas opciones y elegí tus favoritos.</p>
 
-                <!-- Product Grid -->
-                <div class="product-grid" id="product-grid">
-                    <!-- Los productos se renderizan aquí desde JS -->
-                </div>
-
-
-
-                <!-- Mensaje catálogo -->
-                <div class="catalog-notice">
-                    <div class="catalog-notice-inner glassmorphism">
-                        <i class="fa-solid fa-fire-flame-curved notice-icon"></i>
-                        <div class="notice-text">
-                            <p class="notice-title">Estos son nuestros productos más solicitados 🔥</p>
-                            <p class="notice-subtitle">Para ver el catálogo completo con todos nuestros productos, ¡consultanos por WhatsApp!</p>
+                        <!-- Filters (mismo ID, app.js los renderiza acá) -->
+                        <div class="product-filters" id="product-filters">
+                            <button class="filter-btn active" data-filter="all">Todos</button>
+                            <!-- Las categorías se generarán dinámicamente -->
                         </div>
-                        <a href="https://wa.me/5493512755594?text=Hola%20Vitaleze,%20quiero%20ver%20el%20cat%C3%A1logo%20completo%20%F0%9F%8C%BE" target="_blank" class="btn btn-primary notice-btn">
-                            <i class="fa-brands fa-whatsapp"></i> Ver más productos
-                        </a>
+                    </div>
+                </aside>
+
+                <!-- Columna derecha: Grid scrolleable -->
+                <div class="catalog-content">
+                    <!-- Product Grid (mismo ID, app.js renderiza acá) -->
+                    <div class="product-grid" id="product-grid">
+                        <!-- Los productos se renderizan aquí desde JS -->
+                    </div>
+
+                    <!-- Mensaje catálogo -->
+                    <div class="catalog-notice">
+                        <div class="catalog-notice-inner glassmorphism">
+                            <i class="fa-solid fa-fire-flame-curved notice-icon"></i>
+                            <div class="notice-text">
+                                <p class="notice-title">Estos son nuestros productos más solicitados 🔥</p>
+                                <p class="notice-subtitle">Para ver el catálogo completo con todos nuestros productos, ¡consultanos por WhatsApp!</p>
+                            </div>
+                            <a href="https://wa.me/5493512755594?text=Hola%20Vitaleze,%20quiero%20ver%20el%20cat%C3%A1logo%20completo%20%F0%9F%8C%BE" target="_blank" class="btn btn-primary notice-btn">
+                                <i class="fa-brands fa-whatsapp"></i> Ver más productos
+                            </a>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
