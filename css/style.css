@@ -1383,6 +1383,9 @@ img {
     align-items: center;
     justify-content: center;
     transition: background 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .qty-btn:hover {

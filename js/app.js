@@ -342,20 +342,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             el.appendChild(content);
             
-            // Lógica interna del selector de cantidad en la tarjeta
+            // Lógica interna del selector de cantidad en la tarjeta (con e.stopPropagation)
             const qtyVal = content.querySelector('.card-qty-val');
             const minusBtn = content.querySelector('.btn-card-qty-minus');
             const plusBtn = content.querySelector('.btn-card-qty-plus');
 
-            minusBtn.addEventListener('click', () => {
+            minusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 let current = parseInt(qtyVal.textContent) || 1;
                 if (current > 1) qtyVal.textContent = current - 1;
             });
 
-            // Abrir Modal de Detalle al tocar la tarjeta (excepto en los botones de cantidad/agregar)
-            el.addEventListener('click', (e) => {
-                if (!e.target.closest('.card-action-row')) {
-                    openProductModal(p);
+            plusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let current = parseInt(qtyVal.textContent) || 1;
+                qtyVal.textContent = current + 1;
+            });
+
+            // Abrir Modal de Detalle al tocar la foto o título de la tarjeta
+            const imgWrapper = el.querySelector('.product-img-wrapper');
+            const titleEl = el.querySelector('.product-title');
+            
+            [imgWrapper, titleEl].forEach(item => {
+                if (item) {
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openProductModal(p);
+                    });
                 }
             });
 
@@ -365,8 +378,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Eventos de Agregar al Carrito con Cantidad seleccionada
         productGrid.querySelectorAll('.btn-add-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const card = btn.closest('.product-card');
-                const qtyVal = parseInt(card.querySelector('.card-qty-val').textContent) || 1;
+                const qtyValSpan = card ? card.querySelector('.card-qty-val') : null;
+                const qtyVal = qtyValSpan ? (parseInt(qtyValSpan.textContent) || 1) : 1;
                 const pId = btn.dataset.id;
                 const pNombre = btn.dataset.nombre;
                 const pPrecio = Number(btn.dataset.precio) || 0;
@@ -375,6 +390,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Mostrar notificación Toast elegante
                 showToastNotification(`✓ ${qtyVal}x ${pNombre} en tu pedido`);
+
+                // Resetear contador a 1 para el siguiente pedido
+                if (qtyValSpan) qtyValSpan.textContent = '1';
 
                 // Animación de feedback en el botón
                 const originalText = btn.innerHTML;
