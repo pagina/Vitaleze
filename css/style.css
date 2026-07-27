@@ -1527,7 +1527,7 @@ img {
 }
 
 /* =========================================
-   DISEÑO Y NAVEGACIÓN MÓVIL DEL CATÁLOGO (SENIOR UX)
+   DISEÑO Y NAVEGACIÓN MÓVIL DEL CATÁLOGO (SENIOR UX UPGRADE)
    ========================================= */
 
 /* Desktop Grid Layout */
@@ -1536,56 +1536,35 @@ img {
     grid-template-columns: 280px 1fr;
     gap: 2.5rem;
     align-items: start;
+    width: 100%;
 }
 
 .catalog-sidebar {
     position: sticky;
     top: 95px;
+    width: 100%;
 }
 
 .catalog-content {
     min-width: 0;
-}
-
-/* Indicador visual de scroll interno en catálogo */
-.catalog-scroll-hint {
-    display: none;
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--color-primary);
-    font-weight: 600;
-    padding: 0.35rem;
-    background: rgba(74, 124, 89, 0.08);
-    border-radius: 20px;
-    margin-bottom: 0.5rem;
-}
-
-/* Estilos de Scrollbar personalizadas para el catálogo */
-.catalog-content::-webkit-scrollbar {
-    width: 6px;
-}
-.catalog-content::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 10px;
-}
-.catalog-content::-webkit-scrollbar-thumb {
-    background: var(--color-primary-light);
-    border-radius: 10px;
+    width: 100%;
 }
 
 /* Adaptación para pantallas de tablet y móviles (<992px) */
 @media (max-width: 991px) {
     .catalog-layout {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
+        display: block;
+        width: 100%;
     }
 
     .catalog-sidebar {
         position: relative;
         top: 0;
+        width: 100%;
+        margin-bottom: 1.5rem;
     }
 
-    /* Categorías en barra horizontal deslizante con el dedo */
+    /* Categorías en barra horizontal滑动 con el dedo */
     .product-filters {
         display: flex;
         flex-wrap: nowrap;
@@ -1595,6 +1574,7 @@ img {
         margin-bottom: 1rem;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        width: 100%;
     }
 
     .product-filters::-webkit-scrollbar {
@@ -1604,117 +1584,118 @@ img {
     .filter-btn {
         flex-shrink: 0;
         white-space: nowrap;
-        padding: 0.45rem 1rem;
-        font-size: 0.85rem;
+        padding: 0.5rem 1.1rem;
+        font-size: 0.9rem;
     }
 
-    /* Scrollbox de Catálogo Interno en Celular */
     .catalog-content {
-        max-height: 560px;
-        overflow-y: auto;
-        padding: 0.75rem;
-        background: #f8fafc;
-        border-radius: var(--border-radius-md);
-        border: 1.5px solid #e2e8f0;
-        box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .catalog-scroll-hint {
-        display: block;
+        width: 100%;
+        max-height: none;
+        overflow: visible;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
 }
 
-/* Grilla Compacta de 2 Columnas para Celulares (<600px) */
+/* Grilla Centrada para Celulares (<600px) */
 @media (max-width: 600px) {
+    .container {
+        padding: 0 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.65rem;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        width: 100%;
     }
 
     .product-card {
-        border-radius: var(--border-radius-md);
+        width: 100%;
+        border-radius: var(--border-radius-lg);
+        margin: 0 auto;
     }
 
     .product-img-wrapper {
-        height: 135px;
+        height: 220px;
+        width: 100%;
     }
 
     .product-content {
-        padding: 0.65rem;
+        padding: 1.25rem;
     }
 
     .product-title {
-        font-size: 0.9rem;
-        line-height: 1.2;
-        margin-bottom: 0.2rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 2.2em;
+        font-size: 1.15rem;
+        line-height: 1.3;
+        margin-bottom: 0.35rem;
+        min-height: auto;
+        -webkit-line-clamp: none;
+        overflow: visible;
     }
 
     .product-price {
-        font-size: 1rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.15rem;
+        margin-bottom: 0.4rem;
     }
 
     .product-desc {
-        font-size: 0.75rem;
-        margin-bottom: 0.4rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        font-size: 0.88rem;
+        margin-bottom: 0.75rem;
+        -webkit-line-clamp: none;
+        overflow: visible;
     }
 
     .product-ingredients {
-        font-size: 0.7rem;
-        padding: 0.25rem 0.4rem;
-        margin-bottom: 0.4rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        font-size: 0.8rem;
+        padding: 0.5rem 0.65rem;
+        margin-bottom: 0.75rem;
+        -webkit-line-clamp: none;
+        overflow: visible;
     }
 
     .card-action-row {
-        flex-direction: column;
-        gap: 5px;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
     }
 
     .card-qty-wrapper {
-        width: 100%;
-        justify-content: center;
-        height: 30px;
+        width: auto;
+        height: 38px;
     }
 
     .qty-btn {
-        height: 30px;
-        width: 30px;
+        height: 38px;
+        width: 34px;
+        font-size: 1.1rem;
     }
 
     .qty-val {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
+        width: 28px;
     }
 
     .btn-add-cart {
-        width: 100%;
-        padding: 0.4rem 0.4rem;
-        font-size: 0.78rem;
+        flex: 1;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
     }
 
     .product-category-tag {
-        font-size: 0.6rem;
-        padding: 2px 6px;
-        top: 0.4rem;
-        right: 0.4rem;
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        top: 0.6rem;
+        right: 0.6rem;
     }
 
     .badge-tag {
-        font-size: 0.58rem;
-        padding: 2px 5px;
+        font-size: 0.65rem;
+        padding: 3px 7px;
     }
 }
 
