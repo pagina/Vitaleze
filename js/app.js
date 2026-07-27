@@ -76,11 +76,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Helper para notificaciones Toast animadas
+    function showToastNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast-item toast-${type}`;
+        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            setTimeout(() => toast.remove(), 350);
+        }, 2800);
+    }
+
+    // Renderizar Skeletons de carga instantánea
+    function renderSkeletons() {
+        if (!productGrid) return;
+        productGrid.innerHTML = Array(6).fill(0).map(() => `
+            <div class="skeleton-card">
+                <div class="skeleton-box skeleton-img"></div>
+                <div class="skeleton-box skeleton-title"></div>
+                <div class="skeleton-box skeleton-price"></div>
+                <div class="skeleton-box skeleton-desc"></div>
+                <div class="skeleton-box skeleton-btn"></div>
+            </div>
+        `).join('');
+    }
+
+    // Estado global de filtros y búsqueda
+    let currentCategory = 'all';
+    let currentSearchText = '';
+    let currentSortOption = 'default';
+
+    // Referencias a los nuevos controles de búsqueda y ordenamiento
+    const productSearchInput = document.getElementById('product-search');
+    const productSortSelect = document.getElementById('product-sort');
+
+    if (productSearchInput) {
+        productSearchInput.addEventListener('input', (e) => {
+            currentSearchText = e.target.value.toLowerCase().trim();
+            renderProducts();
+        });
+    }
+
+    if (productSortSelect) {
+        productSortSelect.addEventListener('change', (e) => {
+            currentSortOption = e.target.value;
+            renderProducts();
+        });
+    }
+
     // Inicializar UI con resiliencia y en paralelo
     async function init() {
+        renderSkeletons(); // Mostrar esqueletos inmediatamente
         const sectionsPromise = loadDynamicSections().catch(e => console.error('Error secciones:', e));
         const filtersPromise = initFilters().catch(e => console.error('Error filtros:', e));
-        const productsPromise = renderProducts('all').catch(e => console.error('Error productos:', e));
+        const productsPromise = renderProducts().catch(e => console.error('Error productos:', e));
 
         await Promise.all([sectionsPromise, filtersPromise, productsPromise]);
 
@@ -138,51 +190,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.addEventListener('click', async (e) => {
                 productFilters.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                await renderProducts(e.target.dataset.filter);
+                currentCategory = e.target.dataset.filter;
+                await renderProducts();
             });
         });
     }
 
     // Helper: crear imagen con fallback robusto
-    // Maneja imágenes base64 corruptas/truncadas que salen negras
     function createProductImage(src, alt) {
         const img = document.createElement('img');
         img.className = 'product-img';
         img.loading = 'lazy';
         img.alt = alt;
-        img.style.background = '#f3f4f1'; // fondo claro por defecto para evitar flash negro
+        img.style.background = '#f3f4f1';
         
-        // Validar la fuente de la imagen
-        let validSrc = './imagenes/logo.png'; // default fallback
+        let validSrc = './imagenes/logo.png';
         
         if (src && typeof src === 'string') {
             if (src.startsWith('data:image/')) {
-                // Es base64 — verificar que no esté truncada/corrupta
-                // Un base64 válido de imagen real tiene al menos ~200 chars después del header
                 var commaIndex = src.indexOf(',');
                 if (commaIndex > 0 && src.length > commaIndex + 100) {
                     validSrc = src;
-                } else {
-                    console.warn('Imagen base64 truncada para:', alt);
                 }
             } else if (src.trim() !== '') {
-                // URL normal o ruta de archivo
                 validSrc = src;
             }
         }
         
         img.src = validSrc;
         
-        // Fallback si la imagen no carga
         img.onerror = function() {
-            this.onerror = null; // evitar loop
+            this.onerror = null;
             this.src = './imagenes/logo.png';
             this.style.objectFit = 'contain';
             this.style.padding = '2rem';
             this.style.background = '#f3f4f1';
+            this.classList.add('loaded');
         };
         
-        // Detectar imágenes que cargan pero son "negras" (1x1 px o muy pequeñas)
         img.onload = function() {
             if (this.naturalWidth <= 1 || this.naturalHeight <= 1) {
                 this.onerror = null;
@@ -191,24 +236,59 @@ document.addEventListener('DOMContentLoaded', async () => {
                 this.style.padding = '2rem';
                 this.style.background = '#f3f4f1';
             }
+            this.classList.add('loaded');
         };
         
         return img;
     }
 
-    async function renderProducts(filter) {
-        productGrid.innerHTML = '<div class="text-center w-100" style="grid-column:1/-1;"><i class="fa-solid fa-spinner fa-spin fa-2x text-green"></i></div>';
+    // Helper: Generar Badges Nutricionales dinámicos
+    function generateBadges(p) {
+        const badges = [];
+        const str = `${p.nombre || ''} ${p.categoria || ''} ${p.descripcion || ''} ${p.ingredientes || ''}`.toLowerCase();
         
+        if (str.includes('keto')) badges.push('<span class="badge-tag badge-tag-keto">Keto</span>');
+        if (str.includes('sin azucar') || str.includes('sin azúcar') || str.includes('stevia')) badges.push('<span class="badge-tag badge-tag-sin-azucar">Sin Azúcar</span>');
+        if (str.includes('sin tacc') || str.includes('gluten free') || str.includes('sin gluten')) badges.push('<span class="badge-tag badge-tag-sin-tacc">Sin TACC</span>');
+        if (str.includes('almendra') || str.includes('destacado') || str.includes('premium')) badges.push('<span class="badge-tag badge-tag-popular">Popular 🔥</span>');
+
+        return badges.join('');
+    }
+
+    async function renderProducts() {
         const allProducts = await DataManager.getProducts();
-        const filtered = filter === 'all' ? allProducts : allProducts.filter(p => {
+        
+        // 1. Filtrar por categoría
+        let filtered = currentCategory === 'all' ? allProducts : allProducts.filter(p => {
             const cats = Array.isArray(p.categoria) ? p.categoria : (p.categoria || '').split(',').map(c => c.trim());
-            return cats.includes(filter);
+            return cats.includes(currentCategory);
         });
+
+        // 2. Filtrar por texto de búsqueda en vivo
+        if (currentSearchText !== '') {
+            filtered = filtered.filter(p => {
+                const searchPool = `${p.nombre || ''} ${p.categoria || ''} ${p.descripcion || ''} ${p.ingredientes || ''}`.toLowerCase();
+                return searchPool.includes(currentSearchText);
+            });
+        }
+
+        // 3. Ordenar resultados
+        if (currentSortOption === 'price-asc') {
+            filtered.sort((a, b) => (Number(a.precio) || 0) - (Number(b.precio) || 0));
+        } else if (currentSortOption === 'price-desc') {
+            filtered.sort((a, b) => (Number(b.precio) || 0) - (Number(a.precio) || 0));
+        } else if (currentSortOption === 'name-asc') {
+            filtered.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        }
 
         productGrid.innerHTML = '';
 
         if (filtered.length === 0) {
-            productGrid.innerHTML = '<p class="text-muted text-center w-100" style="grid-column: 1/-1;">No hay productos en esta categoría.</p>';
+            productGrid.innerHTML = `
+                <div class="text-muted text-center w-100 py-5" style="grid-column: 1/-1;">
+                    <i class="fa-solid fa-cookie-bite fa-3x mb-3 text-muted" style="opacity:0.5;"></i>
+                    <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+                </div>`;
             return;
         }
 
@@ -216,23 +296,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             const el = document.createElement('div');
             el.className = 'product-card';
             
-            // Crear wrapper de imagen
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'product-img-wrapper';
             
-            // Tag de categoría
+            // Badges contenedores
+            const badgesHtml = generateBadges(p);
+            if (badgesHtml) {
+                const badgesDiv = document.createElement('div');
+                badgesDiv.className = 'product-badges-container';
+                badgesDiv.innerHTML = badgesHtml;
+                imgWrapper.appendChild(badgesDiv);
+            }
+
             const catTag = document.createElement('span');
             catTag.className = 'product-category-tag';
             catTag.textContent = Array.isArray(p.categoria) ? p.categoria.join(' / ') : (p.categoria || 'Sin categoría');
             imgWrapper.appendChild(catTag);
             
-            // Imagen con fallback
             const img = createProductImage(p.imagen, p.nombre);
             imgWrapper.appendChild(img);
             
             el.appendChild(imgWrapper);
             
-            // Contenido
             const content = document.createElement('div');
             content.className = 'product-content';
             content.innerHTML = `
@@ -240,24 +325,53 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <span class="product-price">${formatPrecio(p.precio)}</span>
                 <p class="product-desc">${p.descripcion || ''}</p>
                 ${p.ingredientes ? `<div class="product-ingredients"><strong>Ingredientes:</strong> ${p.ingredientes}</div>` : ''}
-                <button class="btn btn-primary w-100 mt-2 btn-add-cart" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio || 0}">
-                    <i class="fa-solid fa-cart-shopping"></i> Agregar
-                </button>
+                
+                <div class="card-action-row">
+                    <div class="card-qty-wrapper">
+                        <button type="button" class="qty-btn btn-card-qty-minus" aria-label="Restar">-</button>
+                        <span class="qty-val card-qty-val">1</span>
+                        <button type="button" class="qty-btn btn-card-qty-plus" aria-label="Sumar">+</button>
+                    </div>
+                    <button class="btn btn-primary flex-1 btn-add-cart" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio || 0}">
+                        <i class="fa-solid fa-cart-shopping"></i> Agregar
+                    </button>
+                </div>
             `;
             el.appendChild(content);
             
+            // Lógica interna del selector de cantidad en la tarjeta
+            const qtyVal = content.querySelector('.card-qty-val');
+            const minusBtn = content.querySelector('.btn-card-qty-minus');
+            const plusBtn = content.querySelector('.btn-card-qty-plus');
+
+            minusBtn.addEventListener('click', () => {
+                let current = parseInt(qtyVal.textContent) || 1;
+                if (current > 1) qtyVal.textContent = current - 1;
+            });
+
+            plusBtn.addEventListener('click', () => {
+                let current = parseInt(qtyVal.textContent) || 1;
+                qtyVal.textContent = current + 1;
+            });
+
             productGrid.appendChild(el);
         });
 
-        // Eventos de Agregar al Carrito
+        // Eventos de Agregar al Carrito con Cantidad seleccionada
         productGrid.querySelectorAll('.btn-add-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                const card = btn.closest('.product-card');
+                const qtyVal = parseInt(card.querySelector('.card-qty-val').textContent) || 1;
                 const pId = btn.dataset.id;
                 const pNombre = btn.dataset.nombre;
                 const pPrecio = Number(btn.dataset.precio) || 0;
-                addToCart(pId, pNombre, pPrecio);
                 
-                // Efecto de feedback visual rápido
+                addToCart(pId, pNombre, pPrecio, qtyVal);
+                
+                // Mostrar notificación Toast elegante
+                showToastNotification(`✓ ${qtyVal}x ${pNombre} en tu pedido`);
+
+                // Animación de feedback en el botón
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Agregado';
                 btn.classList.add('btn-success');
@@ -329,12 +443,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    window.addToCart = function(id, nombre, precio) {
+    window.addToCart = function(id, nombre, precio, quantity = 1) {
+        const qtyToAdd = parseInt(quantity) || 1;
         const existing = cart.find(i => i.id === id);
         if (existing) {
-            existing.cantidad++;
+            existing.cantidad += qtyToAdd;
         } else {
-            cart.push({ id, nombre, precio: precio || 0, cantidad: 1 });
+            cart.push({ id, nombre, precio: precio || 0, cantidad: qtyToAdd });
         }
         updateCart();
     };

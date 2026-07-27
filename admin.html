@@ -177,9 +177,12 @@
 
                 <!-- TAB: Pedidos -->
                 <div id="tab-orders" class="tab-panel">
-                    <div class="page-header">
-                        <h2><i class="fa-solid fa-clipboard-list"></i> Gestión de Pedidos</h2>
-                        <p class="text-muted">Todos los pedidos desde la web</p>
+                    <div class="page-header flex-between">
+                        <div>
+                            <h2><i class="fa-solid fa-clipboard-list"></i> Gestión de Pedidos</h2>
+                            <p class="text-muted">Todos los pedidos desde la web</p>
+                        </div>
+                        <button id="btn-export-csv" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Exportar a Excel (CSV)</button>
                     </div>
                     <div class="orders-filters">
                         <button class="filter-pill active" data-order-filter="all">Todos</button>

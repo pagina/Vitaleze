@@ -7,9 +7,6 @@
 var SUPABASE_URL = 'https://obtowengfikyyvekywyh.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9idG93ZW5nZmlreXl2ZWt5d3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNTQzNDEsImV4cCI6MjA5MzgzMDM0MX0.2CDTT-Zfp7cdx5U23V0SmCWNKpHZxkcZSzdo5zEGocM';
 
-// Contraseña local de emergencia (siempre funciona)
-var LOCAL_PASS = 'vitaleze2026';
-
 // ---- Inicializar Supabase ----
 // El SDK se carga de forma síncrona antes de data.js, así que siempre está disponible.
 var sb = null;
@@ -241,9 +238,6 @@ class DataManager {
         console.log('Supabase SDK cargado:', !!sb);
         console.log('URL:', SUPABASE_URL);
 
-        var supabaseOk = false;
-
-        // 1. Intentar Supabase Auth
         if (sb) {
             try {
                 console.log('Probando Supabase Auth...');
@@ -259,27 +253,19 @@ class DataManager {
 
                 if (result.error) {
                     console.warn('Supabase error:', result.error.message);
-                    // Mostrar el error real de Supabase al usuario
-                    supabaseOk = true; // Supabase respondió (no es error de red)
+                    return { ok: false, msg: result.error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : result.error.message };
                 }
             } catch (e) {
                 console.warn('Excepción Supabase:', e);
             }
         }
 
-        // 2. SIEMPRE intentar contraseña local como fallback
-        if (password === LOCAL_PASS) {
-            console.log('✅ Login local OK (contraseña: ' + LOCAL_PASS + ')');
-            localStorage.setItem('vz_logged', 'true');
-            localStorage.setItem('vz_email', email || 'Admin');
+        // Si la sesión local fue guardada previamente con un login válido
+        if (localStorage.getItem('vz_logged') === 'true' && localStorage.getItem('vz_email') === email) {
             return { ok: true };
         }
 
-        // 3. Si nada funcionó
-        if (supabaseOk) {
-            return { ok: false, msg: 'Email o contraseña incorrectos.' };
-        }
-        return { ok: false, msg: 'Error de conexión. Intentá de nuevo.' };
+        return { ok: false, msg: 'No se pudo conectar con Supabase. Verifica tus credenciales.' };
     }
 
     static async logout() {

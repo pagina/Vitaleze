@@ -177,19 +177,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fileInput = document.getElementById('p-imagen-file');
     const fileNameEl = document.getElementById('file-name-display');
 
-    // File upload → base64
-    if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (fileNameEl) fileNameEl.textContent = file.name;
+    // Helper: Compresión de imágenes con Canvas (Reduce base64 de ~2.5MB a ~40KB para carga instantánea)
+    function compressImage(file, maxWidth = 800, quality = 0.82) {
+        return new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                document.getElementById('p-imagen').value = ev.target.result;
-                imgPreview.src = ev.target.result;
-                showToast('Foto cargada ✓');
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                    resolve(compressedBase64);
+                };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        });
+    }
+
+    // File upload → base64 comprimido
+    if (fileInput) {
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (fileNameEl) fileNameEl.textContent = file.name + ' (comprimiendo...)';
+            
+            const compressed = await compressImage(file);
+            document.getElementById('p-imagen').value = compressed;
+            imgPreview.src = compressed;
+            if (fileNameEl) fileNameEl.textContent = file.name + ' ✓ (Optimizada)';
+            showToast('Foto optimizada y lista ✓');
         });
     }
 
@@ -345,6 +371,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 const totalStr = orderTotal > 0 ? formatPrecio(orderTotal) : '-';
 
+                const cleanPhone = (o.telefono || '').replace(/\D/g, '');
+                const waTextListo = encodeURIComponent(`¡Hola ${o.cliente || ''}! 🌾 Tu pedido de Vitaleze ya está LISTO para ser retirado / entregado. ¡Muchas gracias!`);
+                const waTextCamino = encodeURIComponent(`¡Hola ${o.cliente || ''}! 🌾 Tu pedido de Vitaleze ya VA EN CAMINO a tu domicilio. ¡Muchas gracias!`);
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${d}</td><td>${o.cliente}</td><td>${telDir}</td><td><div style="max-height:80px;overflow-y:auto;font-size:0.85em;">${pName}</div></td>
@@ -356,6 +386,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <option value="En preparación" ${o.estado === 'En preparación' ? 'selected' : ''}>En preparación</option>
                             <option value="Entregado" ${o.estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
                         </select>
+                        ${cleanPhone ? `
+                            <a href="https://wa.me/${cleanPhone}?text=${waTextListo}" target="_blank" class="btn btn-sm" style="background:#25d366;color:#fff;border:none;padding:4px 8px;font-size:0.75rem;" title="Avisar pedido listo">
+                                <i class="fa-brands fa-whatsapp"></i> Listo
+                            </a>
+                            <a href="https://wa.me/${cleanPhone}?text=${waTextCamino}" target="_blank" class="btn btn-sm" style="background:#128c7e;color:#fff;border:none;padding:4px 8px;font-size:0.75rem;" title="Avisar pedido en camino">
+                                <i class="fa-solid fa-motorcycle"></i> En camino
+                            </a>
+                        ` : ''}
                         <button class="delete-order" data-id="${o.id}"><i class="fa-solid fa-trash-can"></i></button>
                     </div></td>`;
                 tbody.appendChild(row);
@@ -393,19 +431,67 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadOrders();
     }));
 
+    // Exportación de Pedidos a CSV / Excel
+    async function exportOrdersToCSV() {
+        try {
+            const orders = await DataManager.getOrders();
+            if (!orders || orders.length === 0) {
+                showToast('No hay pedidos para exportar', 'info');
+                return;
+            }
+
+            let csvContent = "\uFEFF"; // BOM para abrir correctamente con tildes en Excel UTF-8
+            csvContent += "Fecha,Cliente,Telefono,Direccion,Productos,Total,Estado\n";
+
+            orders.forEach(o => {
+                const dateStr = new Date(o.fecha).toLocaleString('es-AR');
+                const cliente = `"${(o.cliente || '').replace(/"/g, '""')}"`;
+                const telefono = `"${(o.telefono || '').replace(/"/g, '""')}"`;
+                const direccion = `"${(o.direccion || '').replace(/"/g, '""')}"`;
+
+                let prodStr = '';
+                if (Array.isArray(o.productos)) {
+                    prodStr = o.productos.map(p => `${p.cantidad}x ${p.nombre}`).join('; ');
+                } else {
+                    prodStr = String(o.productos || '');
+                }
+                prodStr = `"${prodStr.replace(/"/g, '""')}"`;
+
+                const total = o.total || 0;
+                const estado = `"${o.estado || 'Pendiente'}"`;
+
+                csvContent += `${dateStr},${cliente},${telefono},${direccion},${prodStr},${total},${estado}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Vitaleze_Pedidos_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Reporte CSV descargado ✓');
+        } catch (err) {
+            showToast('Error al exportar CSV: ' + err.message, 'error');
+        }
+    }
+
+    const btnExportCSV = document.getElementById('btn-export-csv');
+    if (btnExportCSV) {
+        btnExportCSV.addEventListener('click', exportOrdersToCSV);
+    }
+
     // ---- CONTENT ----
     function wireFileUpload(fileInputId, textInputId) {
         const fi = document.getElementById(fileInputId);
         if (!fi) return;
-        fi.addEventListener('change', (e) => {
+        fi.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                document.getElementById(textInputId).value = ev.target.result;
-                showToast('Foto cargada ✓');
-            };
-            reader.readAsDataURL(file);
+            const compressed = await compressImage(file);
+            document.getElementById(textInputId).value = compressed;
+            showToast('Foto optimizada ✓');
         });
     }
     wireFileUpload('hero-img-file', 'sec-hero-img');

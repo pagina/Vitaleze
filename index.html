@@ -35,6 +35,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/style.css?v=20260629a">
+
+    <!-- Structured Data JSON-LD (SEO Google) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Vitaleze 🌾",
+      "image": "https://vitaleze.com.ar/imagenes/logo.png",
+      "description": "Alimentación saludable y nutritiva a tu alcance en Córdoba. Opciones Keto, panadería integral, frutos secos y snacks.",
+      "telephone": "+5493512755594",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Córdoba",
+        "addressCountry": "AR"
+      },
+      "url": "https://vitaleze.com.ar/"
+    }
+    </script>
 </head>
 
 <body>
@@ -128,6 +147,22 @@
                     <div class="catalog-sidebar-inner">
                         <h2 class="section-title">Nuestro Catálogo</h2>
                         <p class="catalog-sidebar-desc">Explora nuestras deliciosas opciones y elegí tus favoritos.</p>
+
+                        <!-- Buscador y Ordenamiento -->
+                        <div class="catalog-tools mt-3">
+                            <div class="catalog-search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="product-search" class="catalog-search-input" placeholder="Buscar producto...">
+                            </div>
+                            <div class="catalog-sort-wrapper">
+                                <select id="product-sort" class="catalog-sort-select">
+                                    <option value="default">✨ Ordenar por: Destacados</option>
+                                    <option value="price-asc">💲 Precio: Menor a Mayor</option>
+                                    <option value="price-desc">💰 Precio: Mayor a Menor</option>
+                                    <option value="name-asc">🔤 Nombre: A - Z</option>
+                                </select>
+                            </div>
+                        </div>
 
                         <!-- Filters (mismo ID, app.js los renderiza acá) -->
                         <div class="product-filters" id="product-filters">
@@ -295,6 +330,10 @@
         <i class="fa-solid fa-cart-shopping"></i>
         <span id="cart-count" class="cart-count">0</span>
     </button>
+
+    <!-- Contenedor para Notificaciones Toast Animadas -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- Supabase SDK (sin async para que cargue ANTES de data.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/data.js?v=20260629a"></script>
