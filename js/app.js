@@ -360,10 +360,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             // Abrir Modal de Detalle al tocar la foto o título de la tarjeta
-            const imgWrapper = el.querySelector('.product-img-wrapper');
-            const titleEl = el.querySelector('.product-title');
+            const modalImgTrigger = el.querySelector('.product-img-wrapper');
+            const modalTitleTrigger = el.querySelector('.product-title');
             
-            [imgWrapper, titleEl].forEach(item => {
+            [modalImgTrigger, modalTitleTrigger].forEach(item => {
                 if (item) {
                     item.addEventListener('click', (e) => {
                         e.stopPropagation();
