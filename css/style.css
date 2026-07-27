@@ -490,20 +490,27 @@ img {
     box-shadow: var(--shadow-lg);
 }
 
+.product-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 240px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .product-img {
-    height: 250px;
+    height: 100%;
     width: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    object-position: center;
+    image-orientation: from-image;
+    transition: transform 0.5s ease, opacity 0.35s ease-in-out;
 }
 
 .product-card:hover .product-img {
     transform: scale(1.05);
-}
-
-.product-img-wrapper {
-    position: relative;
-    overflow: hidden;
 }
 
 .product-category-tag {
@@ -1510,6 +1517,198 @@ img {
     to {
         opacity: 0;
         transform: translateX(100%);
+    }
+}
+
+/* =========================================
+   DISEÑO Y NAVEGACIÓN MÓVIL DEL CATÁLOGO (SENIOR UX)
+   ========================================= */
+
+/* Desktop Grid Layout */
+.catalog-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+.catalog-sidebar {
+    position: sticky;
+    top: 95px;
+}
+
+.catalog-content {
+    min-width: 0;
+}
+
+/* Indicador visual de scroll interno en catálogo */
+.catalog-scroll-hint {
+    display: none;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 0.35rem;
+    background: rgba(74, 124, 89, 0.08);
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+}
+
+/* Estilos de Scrollbar personalizadas para el catálogo */
+.catalog-content::-webkit-scrollbar {
+    width: 6px;
+}
+.catalog-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+.catalog-content::-webkit-scrollbar-thumb {
+    background: var(--color-primary-light);
+    border-radius: 10px;
+}
+
+/* Adaptación para pantallas de tablet y móviles (<992px) */
+@media (max-width: 991px) {
+    .catalog-layout {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .catalog-sidebar {
+        position: relative;
+        top: 0;
+    }
+
+    /* Categorías en barra horizontal deslizante con el dedo */
+    .product-filters {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.5rem;
+        padding-bottom: 0.6rem;
+        margin-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .product-filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 0.45rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    /* Scrollbox de Catálogo Interno en Celular */
+    .catalog-content {
+        max-height: 560px;
+        overflow-y: auto;
+        padding: 0.75rem;
+        background: #f8fafc;
+        border-radius: var(--border-radius-md);
+        border: 1.5px solid #e2e8f0;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .catalog-scroll-hint {
+        display: block;
+    }
+}
+
+/* Grilla Compacta de 2 Columnas para Celulares (<600px) */
+@media (max-width: 600px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+    }
+
+    .product-card {
+        border-radius: var(--border-radius-md);
+    }
+
+    .product-img-wrapper {
+        height: 135px;
+    }
+
+    .product-content {
+        padding: 0.65rem;
+    }
+
+    .product-title {
+        font-size: 0.9rem;
+        line-height: 1.2;
+        margin-bottom: 0.2rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.2em;
+    }
+
+    .product-price {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .product-desc {
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-ingredients {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.4rem;
+        margin-bottom: 0.4rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-action-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .card-qty-wrapper {
+        width: 100%;
+        justify-content: center;
+        height: 30px;
+    }
+
+    .qty-btn {
+        height: 30px;
+        width: 30px;
+    }
+
+    .qty-val {
+        font-size: 0.85rem;
+    }
+
+    .btn-add-cart {
+        width: 100%;
+        padding: 0.4rem 0.4rem;
+        font-size: 0.78rem;
+    }
+
+    .product-category-tag {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        top: 0.4rem;
+        right: 0.4rem;
+    }
+
+    .badge-tag {
+        font-size: 0.58rem;
+        padding: 2px 5px;
     }
 }
 

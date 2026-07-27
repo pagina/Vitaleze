@@ -177,30 +177,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     const fileInput = document.getElementById('p-imagen-file');
     const fileNameEl = document.getElementById('file-name-display');
 
-    // Helper: Compresión de imágenes con Canvas (Reduce base64 de ~2.5MB a ~40KB para carga instantánea)
-    function compressImage(file, maxWidth = 800, quality = 0.82) {
+    // Helper: Compresión y conversión universal a JPEG para celulares (iOS / Android / PC)
+    function compressImage(file, maxDimension = 650, quality = 0.70) {
         return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
+            const blobUrl = URL.createObjectURL(file);
+            const img = new Image();
+
+            img.onload = () => {
+                try {
+                    let width = img.naturalWidth || img.width;
+                    let height = img.naturalHeight || img.height;
+
+                    if (width > maxDimension || height > maxDimension) {
+                        if (width > height) {
+                            height = Math.round((height * maxDimension) / width);
+                            width = maxDimension;
+                        } else {
+                            width = Math.round((width * maxDimension) / height);
+                            height = maxDimension;
+                        }
                     }
+
+                    const canvas = document.createElement('canvas');
                     canvas.width = width;
                     canvas.height = height;
+
                     const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, width, height);
                     ctx.drawImage(img, 0, 0, width, height);
+
+                    // Forzar siempre exportación como JPEG estándar (optimizado a ~25KB)
                     const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                    URL.revokeObjectURL(blobUrl);
                     resolve(compressedBase64);
-                };
-                img.src = e.target.result;
+                } catch (e) {
+                    console.error('Error canvas en celular:', e);
+                    URL.revokeObjectURL(blobUrl);
+                    resolve('./imagenes/logo.png');
+                }
             };
-            reader.readAsDataURL(file);
+
+            img.onerror = () => {
+                URL.revokeObjectURL(blobUrl);
+                // Fallback secundario con FileReader
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img2 = new Image();
+                    img2.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.min(img2.width || maxDimension, maxDimension);
+                        canvas.height = Math.min(img2.height || maxDimension, maxDimension);
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img2.onerror = () => resolve('./imagenes/logo.png');
+                    img2.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            img.src = blobUrl;
         });
     }
 

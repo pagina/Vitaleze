@@ -196,24 +196,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Helper: crear imagen con fallback robusto
+    // Helper: crear imagen con fallback robusto y resiliente
     function createProductImage(src, alt) {
         const img = document.createElement('img');
         img.className = 'product-img';
         img.loading = 'lazy';
         img.alt = alt;
-        img.style.background = '#f3f4f1';
+        img.style.background = '#f8fafc';
         
         let validSrc = './imagenes/logo.png';
         
-        if (src && typeof src === 'string') {
-            if (src.startsWith('data:image/')) {
-                var commaIndex = src.indexOf(',');
-                if (commaIndex > 0 && src.length > commaIndex + 100) {
-                    validSrc = src;
+        if (src && typeof src === 'string' && src.trim() !== '') {
+            const cleanSrc = src.trim();
+            if (cleanSrc.startsWith('data:image/')) {
+                const commaIndex = cleanSrc.indexOf(',');
+                if (commaIndex > 0 && cleanSrc.length > commaIndex + 50) {
+                    validSrc = cleanSrc;
                 }
-            } else if (src.trim() !== '') {
-                validSrc = src;
+            } else {
+                validSrc = cleanSrc;
             }
         }
         
@@ -229,14 +230,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         
         img.onload = function() {
-            if (this.naturalWidth <= 1 || this.naturalHeight <= 1) {
+            if (this.naturalWidth > 1 && this.naturalHeight > 1) {
+                this.classList.add('loaded');
+            } else if (this.src !== './imagenes/logo.png') {
                 this.onerror = null;
                 this.src = './imagenes/logo.png';
                 this.style.objectFit = 'contain';
                 this.style.padding = '2rem';
                 this.style.background = '#f3f4f1';
+                this.classList.add('loaded');
             }
-            this.classList.add('loaded');
         };
         
         return img;
