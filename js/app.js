@@ -352,9 +352,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (current > 1) qtyVal.textContent = current - 1;
             });
 
-            plusBtn.addEventListener('click', () => {
-                let current = parseInt(qtyVal.textContent) || 1;
-                qtyVal.textContent = current + 1;
+            // Abrir Modal de Detalle al tocar la tarjeta (excepto en los botones de cantidad/agregar)
+            el.addEventListener('click', (e) => {
+                if (!e.target.closest('.card-action-row')) {
+                    openProductModal(p);
+                }
             });
 
             productGrid.appendChild(el);
@@ -396,6 +398,82 @@ document.addEventListener('DOMContentLoaded', async () => {
             heroBg.style.transform = `translate(-${x * 30}px, -${y * 30}px)`;
         }
     });
+
+    // -------------------------------------------------------------
+    // MODAL DE DETALLE DE PRODUCTO (VISTA RÁPIDA COMPLETA)
+    // -------------------------------------------------------------
+    const productModalOverlay = document.getElementById('product-modal-overlay');
+    const productModal = document.getElementById('product-modal');
+    const closeProductModalBtn = document.getElementById('close-product-modal');
+    const productModalBody = document.getElementById('product-modal-body');
+
+    function closeProductDetailModal() {
+        if (productModal) productModal.classList.remove('active');
+        if (productModalOverlay) productModalOverlay.classList.remove('active');
+    }
+
+    if (closeProductModalBtn && productModalOverlay) {
+        closeProductModalBtn.addEventListener('click', closeProductDetailModal);
+        productModalOverlay.addEventListener('click', closeProductDetailModal);
+    }
+
+    function openProductModal(p) {
+        if (!productModal || !productModalBody) return;
+
+        const badgesHtml = generateBadges(p);
+        const img = createProductImage(p.imagen, p.nombre);
+        img.className = 'product-modal-img';
+
+        productModalBody.innerHTML = '';
+        productModalBody.appendChild(img);
+
+        const details = document.createElement('div');
+        details.innerHTML = `
+            ${badgesHtml ? `<div class="mb-2">${badgesHtml}</div>` : ''}
+            <h3 class="product-modal-title">${p.nombre}</h3>
+            <div class="product-modal-price">${formatPrecio(p.precio)}</div>
+            <p class="product-modal-desc">${p.descripcion || 'Sin descripción disponible.'}</p>
+            ${p.ingredientes ? `<div class="product-modal-ingredients"><strong>Ingredientes completas:</strong><br>${p.ingredientes}</div>` : ''}
+            
+            <div class="card-action-row mt-3">
+                <div class="card-qty-wrapper">
+                    <button type="button" class="qty-btn btn-modal-qty-minus">-</button>
+                    <span class="qty-val modal-qty-val">1</span>
+                    <button type="button" class="qty-btn btn-modal-qty-plus">+</button>
+                </div>
+                <button class="btn btn-primary flex-1 btn-modal-add-cart" data-id="${p.id}" data-nombre="${p.nombre}" data-precio="${p.precio || 0}">
+                    <i class="fa-solid fa-cart-shopping"></i> Agregar al Pedido
+                </button>
+            </div>
+        `;
+
+        productModalBody.appendChild(details);
+
+        const qtyVal = details.querySelector('.modal-qty-val');
+        const minusBtn = details.querySelector('.btn-modal-qty-minus');
+        const plusBtn = details.querySelector('.btn-modal-qty-plus');
+        const addBtn = details.querySelector('.btn-modal-add-cart');
+
+        minusBtn.addEventListener('click', () => {
+            let current = parseInt(qtyVal.textContent) || 1;
+            if (current > 1) qtyVal.textContent = current - 1;
+        });
+
+        plusBtn.addEventListener('click', () => {
+            let current = parseInt(qtyVal.textContent) || 1;
+            qtyVal.textContent = current + 1;
+        });
+
+        addBtn.addEventListener('click', () => {
+            const count = parseInt(qtyVal.textContent) || 1;
+            addToCart(p.id, p.nombre, Number(p.precio) || 0, count);
+            showToastNotification(`✓ ${count}x ${p.nombre} en tu pedido`);
+            closeProductDetailModal();
+        });
+
+        productModalOverlay.classList.add('active');
+        productModal.classList.add('active');
+    }
 
     // -------------------------------------------------------------
     // 3. Lógica del Carrito de Compras

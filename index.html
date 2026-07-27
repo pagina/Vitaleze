@@ -335,6 +335,13 @@
     <!-- Contenedor para Notificaciones Toast Animadas -->
     <div id="toast-container" class="toast-container"></div>
 
+    <!-- Modal de Detalle de Producto (Vista Rápida) -->
+    <div id="product-modal-overlay" class="product-modal-overlay"></div>
+    <div id="product-modal" class="product-modal glassmorphism">
+        <button id="close-product-modal" class="modal-close-btn btn-icon" aria-label="Cerrar"><i class="fa-solid fa-times"></i></button>
+        <div id="product-modal-body" class="product-modal-body"></div>
+    </div>
+
     <!-- Supabase SDK (sin async para que cargue ANTES de data.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/data.js?v=20260629a"></script>
